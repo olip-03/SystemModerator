@@ -5,17 +5,59 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SystemModerator"
         mc:Ignorable="d"
-        Title="System Moderator" Height="450" Width="511">
+        Title="System Moderator" Height="456" Width="637">
     <Grid>
-        <Menu Margin="0,0,0,412"/>
-        <ListView d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,0,324,0" Height="412" VerticalAlignment="Bottom">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <DockPanel LastChildFill="False"/>
-
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="20*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180*"/>
+            <ColumnDefinition Width="457*"/>
+        </Grid.ColumnDefinitions>
+        <!-- Menu -->
+        <Menu HorizontalAlignment="Left" Margin="0,0,0,1" Width="637" Grid.ColumnSpan="2">
+            <MenuItem Header="_Edit">
+                <MenuItem Command="ApplicationCommands.Copy"/>
+                <MenuItem Command="ApplicationCommands.Cut"/>
+                <MenuItem Command="ApplicationCommands.Paste"/>
+            </MenuItem>
+            <MenuItem Header="_Font" Height="20">
+                <MenuItem Header="_Bold" IsCheckable="True"/>
+                <MenuItem Header="_Italic" IsCheckable="True"/>
+                <Separator/>
+                <MenuItem Header="I_ncrease Font Size"/>
+                <MenuItem Header="_Decrease Font Size"/>
+            </MenuItem>
+        </Menu>
+        <!-- Domain Controls -->
+        <!-- https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/treeview-overview?view=netframeworkdesktop-4.8 -->
+        <TreeView Name="myTreeViewEvent" Grid.RowSpan="2" Margin="0,20,0,0" >
+            <TreeViewItem Header="Employee1" IsSelected="True">
+                <TreeViewItem Header="Jesper Aaberg"/>
+                <TreeViewItem Header="Employee Number">
+                    <TreeViewItem Header="12345"/>
+                </TreeViewItem>
+                <TreeViewItem Header="Work Days">
+                    <TreeViewItem Header="Monday"/>
+                    <TreeViewItem Header="Tuesday"/>
+                    <TreeViewItem Header="Thursday"/>
+                </TreeViewItem>
+            </TreeViewItem>
+            <TreeViewItem Header="Employee2">
+                <TreeViewItem Header="Dominik Paiha"/>
+                <TreeViewItem Header="Employee Number">
+                    <TreeViewItem Header="98765"/>
+                </TreeViewItem>
+                <TreeViewItem Header="Work Days">
+                    <TreeViewItem Header="Tuesday"/>
+                    <TreeViewItem Header="Wednesday"/>
+                    <TreeViewItem Header="Friday"/>
+                </TreeViewItem>
+            </TreeViewItem>
+        </TreeView>
+        <GridSplitter HorizontalAlignment="Left" Height="auto" Width="5" Grid.Column="1" Grid.RowSpan="2" Margin="0,20,0,0"/>
+        <!-- Asset Layout -->
+        <ListBox Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=50}" Margin="5,20,0,0" Grid.RowSpan="2"/>
     </Grid>
 </Window>
