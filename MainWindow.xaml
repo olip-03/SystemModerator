@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SystemModerator"
         mc:Ignorable="d"
-        Title="System Moderator" Height="456" Width="637">
+        Title="System Moderator" Height="456" Width="637" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -13,10 +13,11 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="180*"/>
-            <ColumnDefinition Width="457*"/>
+            <ColumnDefinition Width="81*"/>
+            <ColumnDefinition Width="376*"/>
         </Grid.ColumnDefinitions>
         <!-- Menu -->
-        <Menu HorizontalAlignment="Left" Margin="0,0,0,1" Width="637" Grid.ColumnSpan="2">
+        <Menu HorizontalAlignment="Left" Margin="0,0,0,1" Width="637" Grid.ColumnSpan="3">
             <MenuItem Header="_Edit">
                 <MenuItem Command="ApplicationCommands.Copy"/>
                 <MenuItem Command="ApplicationCommands.Cut"/>
@@ -58,6 +59,6 @@
         </TreeView>
         <GridSplitter HorizontalAlignment="Left" Height="auto" Width="5" Grid.Column="1" Grid.RowSpan="2" Margin="0,20,0,0"/>
         <!-- Asset Layout -->
-        <ListBox Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=50}" Margin="5,20,0,0" Grid.RowSpan="2"/>
+        <ListBox Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=50}" Margin="5,20,0,0" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>
