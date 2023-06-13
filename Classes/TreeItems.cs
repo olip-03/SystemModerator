@@ -12,10 +12,11 @@ namespace SystemModerator.Classes
         Asset,
         Directory
     }
-    internal class TreeAsset: IComparable<TreeAsset>
-    {
+    public class TreeAsset: IComparable<TreeAsset>
+    { // Default values for unset class
         public string name { get; set; } = string.Empty;
         public string path { get; set; } = string.Empty;
+        public int assetIndex { get; set; } = -1;
         public TreeType type { get; set; } = TreeType.Unset;
 
         public int CompareTo(TreeAsset other)
@@ -34,5 +35,16 @@ namespace SystemModerator.Classes
             }
             return -1;
         }
+    }
+    public class Asset
+    {
+        public string DistinguishedName { get; set; }
+        public string DNSHostName { get; set; }
+        public string Enabled { get; set; }
+        public string Name { get; set; }
+        public string ObjectClass { get; set; }
+        public string ObjectGUID { get; set; }
+        public string SamAccountName { get; set; }
+        public string UserPrincipalName { get; set; }
     }
 }

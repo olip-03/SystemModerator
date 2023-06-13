@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SystemModerator"
         mc:Ignorable="d"
-        Title="System Moderator" Height="456" Width="637" Loaded="Window_Loaded">
+        Title="System Moderator" Height="456" Width="632" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition/>
             <RowDefinition Height="20*"/>
+            <RowDefinition Height="399*"/>
+            <RowDefinition Height="30*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="180*"/>
-            <ColumnDefinition Width="81*"/>
             <ColumnDefinition Width="376*"/>
         </Grid.ColumnDefinitions>
         <!-- Menu -->
@@ -33,7 +33,7 @@
         </Menu>
         <!-- Domain Controls -->
         <!-- https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/treeview-overview?view=netframeworkdesktop-4.8 -->
-        <TreeView Name="myTreeViewEvent" Grid.RowSpan="2" Margin="0,20,0,0" >
+        <TreeView Name="TreeView1" Grid.RowSpan="2" Margin="0,0,0,29" Grid.Row="1" >
             <TreeViewItem Header="Employee1" IsSelected="True">
                 <TreeViewItem Header="Jesper Aaberg"/>
                 <TreeViewItem Header="Employee Number">
@@ -57,8 +57,22 @@
                 </TreeViewItem>
             </TreeViewItem>
         </TreeView>
-        <GridSplitter HorizontalAlignment="Left" Height="auto" Width="5" Grid.Column="1" Grid.RowSpan="2" Margin="0,20,0,0"/>
+        <GridSplitter HorizontalAlignment="Left" Height="auto" Width="5" Grid.Column="1" Grid.RowSpan="2" Margin="0,0,0,29" Grid.Row="1"/>
         <!-- Asset Layout -->
-        <ListBox Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=50}" Margin="5,20,0,0" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
+        <ListBox Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=50}" Margin="5,0,0,29" Grid.RowSpan="2" Grid.ColumnSpan="2" Grid.Row="1"/>
+        <!-- Bottom menu bar -->
+        <Grid Grid.Row="2" Grid.ColumnSpan="3">
+            <Label Content="Progress: " Margin="5,0,0,0" Width="143" VerticalAlignment="Center" HorizontalAlignment="Left" Height="29"/>
+            <ProgressBar Margin="153,0,2,0" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="19" RenderTransformOrigin="0.5,0.5" >
+                <ProgressBar.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleY="-1"/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </ProgressBar.RenderTransform>
+            </ProgressBar>
+        </Grid>
     </Grid>
 </Window>
