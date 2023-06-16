@@ -5,25 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SystemModerator"
         mc:Ignorable="d"
-        Title="System Moderator" Height="456" Width="632" Loaded="Window_Loaded">
+        Title="System Moderator" Height="456" Width="782" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20*"/>
+            <RowDefinition Height="25"/>
             <RowDefinition Height="399*"/>
-            <RowDefinition Height="30*"/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="180*"/>
-            <ColumnDefinition Width="376*"/>
+            <ColumnDefinition Width="207*"/>
+            <ColumnDefinition Width="425*"/>
         </Grid.ColumnDefinitions>
         <!-- Menu -->
-        <Menu HorizontalAlignment="Left" Margin="0,0,0,1" Width="637" Grid.ColumnSpan="3">
-            <MenuItem Header="_Edit">
+        <Menu Margin="0,0,0,1" Grid.ColumnSpan="2">
+            <MenuItem Header="_Edit" VerticalContentAlignment="Stretch" Height="24">
                 <MenuItem Command="ApplicationCommands.Copy"/>
                 <MenuItem Command="ApplicationCommands.Cut"/>
                 <MenuItem Command="ApplicationCommands.Paste"/>
             </MenuItem>
-            <MenuItem Header="_Font" Height="20">
+            <MenuItem Header="_Font" Height="24" VerticalContentAlignment="Stretch">
                 <MenuItem Header="_Bold" IsCheckable="True"/>
                 <MenuItem Header="_Italic" IsCheckable="True"/>
                 <Separator/>
@@ -33,37 +33,14 @@
         </Menu>
         <!-- Domain Controls -->
         <!-- https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/treeview-overview?view=netframeworkdesktop-4.8 -->
-        <TreeView Name="TreeView1" Grid.RowSpan="2" Margin="0,0,0,29" Grid.Row="1" >
-            <TreeViewItem Header="Employee1" IsSelected="True">
-                <TreeViewItem Header="Jesper Aaberg"/>
-                <TreeViewItem Header="Employee Number">
-                    <TreeViewItem Header="12345"/>
-                </TreeViewItem>
-                <TreeViewItem Header="Work Days">
-                    <TreeViewItem Header="Monday"/>
-                    <TreeViewItem Header="Tuesday"/>
-                    <TreeViewItem Header="Thursday"/>
-                </TreeViewItem>
-            </TreeViewItem>
-            <TreeViewItem Header="Employee2">
-                <TreeViewItem Header="Dominik Paiha"/>
-                <TreeViewItem Header="Employee Number">
-                    <TreeViewItem Header="98765"/>
-                </TreeViewItem>
-                <TreeViewItem Header="Work Days">
-                    <TreeViewItem Header="Tuesday"/>
-                    <TreeViewItem Header="Wednesday"/>
-                    <TreeViewItem Header="Friday"/>
-                </TreeViewItem>
-            </TreeViewItem>
-        </TreeView>
-        <GridSplitter HorizontalAlignment="Left" Height="auto" Width="5" Grid.Column="1" Grid.RowSpan="2" Margin="0,0,0,29" Grid.Row="1"/>
+        <TextBox Margin="5,3,70,0" Grid.Row="1" TextWrapping="Wrap" Text="Search" VerticalAlignment="Top" Height="20" Cursor="IBeam"/>
+        <TreeView Name="TreeView1" Margin="5,26,0,0" Grid.Row="1" />
+        <GridSplitter HorizontalAlignment="Left" Height="auto" Width="5" Grid.Column="1" Grid.RowSpan="2" Margin="0,0,0,29" Grid.Row="1" Background="#00000000"/>
         <!-- Asset Layout -->
-        <ListBox Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=50}" Margin="5,0,0,29" Grid.RowSpan="2" Grid.ColumnSpan="2" Grid.Row="1"/>
+        <ListBox Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=50}" Margin="5,4,5,0" Grid.Row="1"/>
         <!-- Bottom menu bar -->
-        <Grid Grid.Row="2" Grid.ColumnSpan="3">
-            <Label Content="Progress: " Margin="5,0,0,0" Width="143" VerticalAlignment="Center" HorizontalAlignment="Left" Height="29"/>
-            <ProgressBar Margin="153,0,2,0" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="19" RenderTransformOrigin="0.5,0.5" >
+        <Grid Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Bottom">
+            <ProgressBar Margin="153,0,5,5" VerticalContentAlignment="Center" VerticalAlignment="Bottom" Height="19" RenderTransformOrigin="0.5,0.5" >
                 <ProgressBar.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleY="-1"/>
@@ -73,6 +50,8 @@
                     </TransformGroup>
                 </ProgressBar.RenderTransform>
             </ProgressBar>
+            <Label Content="Progress: " Margin="5,0,0,0" Width="143" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="29"/>
         </Grid>
+        <Button Content="Button" HorizontalAlignment="Right" Margin="0,3,0,0" Grid.Row="1" VerticalAlignment="Top" Width="62" Height="20"/>
     </Grid>
 </Window>

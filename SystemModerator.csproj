@@ -6,6 +6,12 @@
     <UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <Title>System Moderator</Title>
+    <Authors>Oliver Posa</Authors>
+    <NeutralLanguage>en-001</NeutralLanguage>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/olip-03/SystemModerator</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Scripts\Main.ps1" />

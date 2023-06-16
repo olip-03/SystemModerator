@@ -12,6 +12,7 @@ using System.Diagnostics;
 using SystemModerator.Classes;
 using Newtonsoft.Json;
 using System.Windows.Controls;
+using System.DirectoryServices;
 
 namespace SystemModerator
 {
@@ -21,6 +22,8 @@ namespace SystemModerator
     public partial class MainWindow : Window
     {
         public List<Asset> Assets = new List<Asset>();
+
+        private string currentViewDomain = String.Empty;
 
         private PowerShell ps = PowerShell.Create();
         private static Dictionary<string, string> resources = new Dictionary<string, string>()
@@ -33,7 +36,7 @@ namespace SystemModerator
             InitializeComponent();
         }
 
-        // Start 
+        // Start application
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // Extract any embedded PowerShell Scripts that the application needs in order to run
@@ -54,21 +57,7 @@ namespace SystemModerator
             });
             await RunFunctions("Initialize", progress);
 
-            // Load computers from Active Directory
-            progress = new Progress<Tuple<int, string>>(data =>
-            { // Update progress reporter
-                if (data.Item2 != null)
-                {
-                    // Get all the  JSON in here
-                    List<Asset> models = JsonConvert.DeserializeObject<List<Asset>>(data.Item2.ToString());
-                    for (int i = 0; i < models.Count; i++)
-                    {
-                        Assets.Insert(i, models[i]);
-                    }
-                }
-            });
-            await RunFunctions("GetResources", progress);
-            await PopulateTreeView();
+            await InitTreeView();
         }
 
         #region Methods
@@ -153,90 +142,115 @@ namespace SystemModerator
             });
             return true;
         }
-        private async Task<bool> RunFunctions(string func, IProgress<Tuple<int, string>> data)
+        private async Task InitTreeView()
+        {
+            List<ADOrganizationalUnit> adInfo = new List<ADOrganizationalUnit>();
+
+            // Get info from active directory
+            #pragma warning disable CA1416 // Validate platform compatibility
+            // I only intend for this application to be running on Windows, so this is beyond
+            // my concern. If someone wants a linux desktop build of this they can use wine.
+            DirectorySearcher searcher = new DirectorySearcher
+            {
+                // specify that you search for organizational units 
+                Filter = "(objectCategory=organizationalUnit)",
+                SearchScope = SearchScope.OneLevel
+            };
+            foreach (SearchResult result in searcher.FindAll())
+            {
+                ADOrganizationalUnit item = new ADOrganizationalUnit();
+                item.Name = result.Properties["name"].OfType<string>().First(); 
+                item.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
+                item.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First(); 
+                adInfo.Add(item);
+            }
+            #pragma warning restore CA1416 // Validate platform compatibility
+
+            if (adInfo == null || adInfo.Count <= 0) { return; }
+
+            TreeViewItem ParentItem = new TreeViewItem();
+            ParentItem.Header = System.Environment.UserDomainName;
+            if (TreeView1.SelectedItem != null)
+            {
+                ParentItem = TreeView1.SelectedItem as TreeAsset;
+            }
+
+            foreach (ADOrganizationalUnit item in adInfo)
+            {
+                TreeAsset ChildItem = new TreeAsset();
+
+                ChildItem.ADObject = item;
+                ChildItem.Header = item.Name;
+
+                ChildItem.Items.Add(new TreeAsset());
+                ChildItem.Selected += ChildItem.treeItem_SelectedAsync;
+                ChildItem.MouseDoubleClick += ChildItem.treeItem_SelectedAsync;
+                ChildItem.Expanded += ChildItem.treeItem_SelectedAsync;
+
+                ParentItem.Items.Add(ChildItem);
+            }
+
+            TreeView1.Items.Add(ParentItem);
+        }
+        public async Task<bool> RunFunctions(string func, IProgress<Tuple<int, string>> data)
         { // Runs the powershell function
             bool pass = false;
 
             await Task.Run(() =>
             {
-                // Clear previous stream information and add the script
-                ps.Streams.ClearStreams();
-                ps.AddScript(func);
-
-                // prepare a collection for the output, register event handler
-                var output = new PSDataCollection<string>();
-                output.DataAdded += delegate (object sender, DataAddedEventArgs eventArgs)
+                try
                 {
-                    var collection = sender as PSDataCollection<string>;
-                    if (null != collection)
+                    // Clear previous stream information and add the script
+                    ps.Streams.ClearStreams();
+                    ps.AddScript(func);
+
+                    // prepare a collection for the output, register event handler
+                    var output = new PSDataCollection<string>();
+                    output.DataAdded += delegate (object sender, DataAddedEventArgs eventArgs)
                     {
-                        var outputItem = collection[eventArgs.Index];
-
-                        // Here's where you'd update the form with the new output item
-                        data.Report(new Tuple<int, string>(-1, outputItem));
-                    }
-                };
-
-                // invoke the command asynchronously - we'll be relying on the event handler to process the output instead of collecting it here
-                var asyncToken = ps.BeginInvoke<object, string>(null, output);
-
-                if (asyncToken.AsyncWaitHandle.WaitOne())
-                {
-                    if (ps.HadErrors)
-                    {
-                        foreach (var errorRecord in ps.Streams.Error)
+                        var collection = sender as PSDataCollection<string>;
+                        if (null != collection)
                         {
-                            // inspect errors here
-                            // alternatively: register an event handler for `powerShell.Streams.Error.DataAdded` event
-                            if (!errorRecord.Exception.Message.Contains("The input object cannot be bound to any parameters for the command either because the command does not take pipeline input or the input and its properties do not match any of the parameters that take pipeline input"))
-                            { // Just check that it doesn't contain this stupid fucking error that shouldn't exist
-                                output.Add(errorRecord.Exception.Message);
+                            var outputItem = collection[eventArgs.Index];
+
+                            // Here's where you'd update the form with the new output item
+                            data.Report(new Tuple<int, string>(-1, outputItem));
+                        }
+                    };
+
+                    // invoke the command asynchronously - we'll be relying on the event handler to process the output instead of collecting it here
+                    var asyncToken = ps.BeginInvoke<object, string>(null, output);
+
+                    if (asyncToken.AsyncWaitHandle.WaitOne())
+                    {
+                        if (ps.HadErrors)
+                        {
+                            foreach (var errorRecord in ps.Streams.Error)
+                            {
+                                // inspect errors here
+                                // alternatively: register an event handler for `powerShell.Streams.Error.DataAdded` event
+                                if (!errorRecord.Exception.Message.Contains("The input object cannot be bound to any parameters for the command either because the command does not take pipeline input or the input and its properties do not match any of the parameters that take pipeline input"))
+                                { // Just check that it doesn't contain this stupid fucking error that shouldn't exist
+                                    output.Add(errorRecord.Exception.Message);
+                                }
                             }
                         }
-                    }
 
-                    // end invocation without collecting output (event handler has already taken care of that)
-                    ps.EndInvoke(asyncToken);
+                        // end invocation without collecting output (event handler has already taken care of that)
+                        ps.EndInvoke(asyncToken);
+                    }
+                }
+                catch (Exception)
+                {
+
                 }
             });
             return pass;
         }
-        private async Task PopulateTreeView()
-        {
-            TreeView1.Items.Clear();
+        #endregion
 
-            TreeViewItem ParentItem = new TreeViewItem();
-            ParentItem.Header = "Computers";
-            TreeView1.Items.Add(ParentItem);
-            // Distinguished name should look like this:
-            // "CN=F27616,OU=Windows10_MOE,OU=Windows10,OU=Perth,OU=Computers,OU=MGL,DC=monadelphous,DC=com,DC=au"
-            foreach (Asset asset in Assets) 
-            {
-                TreeViewItem Child1Item = new TreeViewItem();
-                List<String> DNInfo = asset.DistinguishedName.Split(',').ToList();
-                for (int i = 0; i < DNInfo.Count(); i++)
-                {
-                    string item = DNInfo[i];
-                    if(item.Contains("CN="))
-                    { // This is the item name
-                        item.Replace("CN=", "");
-                        DNInfo.RemoveAt(i);
-                    }
-                    if (item.Contains("OU="))
-                    { // This is part of where it is located
-                        item.Replace("OU=", "");
-                        
-                    }
-                    if (item.Contains("DC="))
-                    { // This is the part of the domain controller
-                        item.Replace("DC=", "");
-                        DNInfo.RemoveAt(i);
-                    }
-                }
-                Child1Item.Header = asset.Name;
-                ParentItem.Items.Add(Child1Item);
-            }
-        }
+        #region interactions
+
         #endregion
     }
 }
