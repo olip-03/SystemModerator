@@ -23,8 +23,6 @@ namespace SystemModerator
     {
         public List<Asset> Assets = new List<Asset>();
 
-        private string currentViewDomain = String.Empty;
-
         private PowerShell ps = PowerShell.Create();
         private static Dictionary<string, string> resources = new Dictionary<string, string>()
         {
@@ -34,6 +32,7 @@ namespace SystemModerator
         public MainWindow()
         {
             InitializeComponent();
+            AppData.mainWindow = this;
         }
 
         // Start application
@@ -168,27 +167,24 @@ namespace SystemModerator
 
             if (adInfo == null || adInfo.Count <= 0) { return; }
 
-            TreeViewItem ParentItem = new TreeViewItem();
-            ParentItem.Header = System.Environment.UserDomainName;
+            DirectoryEntry RootDirEntry = new DirectoryEntry("LDAP://RootDSE");
+            string distinguishedName = RootDirEntry.Properties["defaultNamingContext"].Value.ToString();
+
+            TreeAsset ParentItem = new TreeAsset();
+            ParentItem.Header = distinguishedName;
+            ParentItem.ADObject = new ADOrganizationalUnit();
+            ParentItem.Name = System.Environment.UserDomainName;
+
+            ParentItem.ADObject.DistinguishedName = distinguishedName;
+            ParentItem.ADObject.Name = distinguishedName;
+            ParentItem.ADObject.ObjectClass = "organizationalUnit";
+
             if (TreeView1.SelectedItem != null)
             {
                 ParentItem = TreeView1.SelectedItem as TreeAsset;
             }
 
-            foreach (ADOrganizationalUnit item in adInfo)
-            {
-                TreeAsset ChildItem = new TreeAsset();
-
-                ChildItem.ADObject = item;
-                ChildItem.Header = item.Name;
-
-                ChildItem.Items.Add(new TreeAsset());
-                ChildItem.Selected += ChildItem.treeItem_SelectedAsync;
-                ChildItem.MouseDoubleClick += ChildItem.treeItem_SelectedAsync;
-                ChildItem.Expanded += ChildItem.treeItem_SelectedAsync;
-
-                ParentItem.Items.Add(ChildItem);
-            }
+            await PopulateFromDN(ParentItem, ParentItem.ADObject.DistinguishedName);
 
             TreeView1.Items.Add(ParentItem);
         }
@@ -250,7 +246,63 @@ namespace SystemModerator
         #endregion
 
         #region interactions
+        public async void treeItem_SelectedAsync(object sender, RoutedEventArgs e)
+        {         
+            TreeAsset asset = (TreeAsset)sender;
 
+            List_SystemBrowse.Items.Clear();
+            List<ADOrganizationalUnit> OUs = asset.children;
+
+            foreach (var organizationalUnit in OUs)
+            {
+                List_SystemBrowse.Items.Add(organizationalUnit.Name);
+            }
+        }
+        public async void treeItem_ExpandAsync(object sender, RoutedEventArgs e)
+        {
+            TreeAsset asset = (TreeAsset)sender;
+
+            await PopulateFromDN(asset, asset.ADObject.DistinguishedName);
+        }
+        public async Task PopulateFromDN(TreeAsset asset, string DN)
+        {
+            Trace.WriteLine("Browse to " + DN);
+            List<ADOrganizationalUnit> adInfo = ActiveDirectory.GetOUAt(asset.ADObject.DistinguishedName);
+
+            if (asset.populated) return;
+            if (adInfo == null) { return; }
+            foreach (ADOrganizationalUnit item in adInfo)
+            {
+                TreeAsset ChildItem = new TreeAsset();
+
+                ChildItem.ADObject = item;
+                ChildItem.Header = item.Name;
+
+                // Send messages to main list box to display assets
+                ChildItem.Expanded += treeItem_ExpandAsync;
+                ChildItem.Selected += treeItem_SelectedAsync;
+
+                ChildItem.Items.Add(new TreeAsset());
+
+                asset.children.Add(item);
+                asset.Items.Add(ChildItem);
+            }
+            asset.populated = true;
+
+            // remove any empty spaces
+            List<TreeAsset> ToRemove = new List<TreeAsset>();
+            foreach (TreeAsset item in asset.Items)
+            {
+                if (item.Header == null)
+                { // clear anything that doesn't have data
+                    ToRemove.Add(item);
+                }
+            }
+            foreach (TreeAsset item in ToRemove)
+            {
+                asset.Items.Remove(item);
+            }
+        }
         #endregion
     }
 }

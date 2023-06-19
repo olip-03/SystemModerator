@@ -14,4 +14,9 @@ namespace SystemModerator
     public partial class App : Application
     {
     }
+
+    public static class AppData
+    {
+        public static MainWindow mainWindow;
+    }
 }
