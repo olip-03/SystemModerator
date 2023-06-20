@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SystemModerator"
         mc:Ignorable="d"
-        Title="System Moderator" Height="456" Width="782" Loaded="Window_Loaded">
+        Title="System Moderator" Height="456" Width="632" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
@@ -37,6 +37,7 @@
         <TreeView Name="TreeView1" Margin="5,26,0,0" Grid.Row="1" />
         <GridSplitter HorizontalAlignment="Left" Height="auto" Width="5" Grid.Column="1" Grid.RowSpan="2" Margin="0,0,0,29" Grid.Row="1" Background="#00000000"/>
         <!-- Asset Layout -->
+        <Label x:Name="txt_directorylabel" Grid.Column="1" Content="Label" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Height="26" Width="516" Margin="5,0,0,0" VerticalContentAlignment="Center"/>
         <ListBox Name="List_SystemBrowse" Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=50}" Margin="5,26,5,0" Grid.Row="1"/>
         <!-- Bottom menu bar -->
         <Grid Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Bottom">
@@ -53,6 +54,5 @@
             <Label Content="Progress: " Margin="5,0,0,0" Width="143" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="29"/>
         </Grid>
         <Button Content="Button" HorizontalAlignment="Right" Margin="0,3,0,0" Grid.Row="1" VerticalAlignment="Top" Width="62" Height="20"/>
-        <Label x:Name="txt_directorylabel" Grid.Column="1" Content="Label" HorizontalAlignment="Center" Grid.Row="1" VerticalAlignment="Top" Height="26" Width="516"/>
     </Grid>
 </Window>

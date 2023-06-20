@@ -186,6 +186,7 @@ namespace SystemModerator
 
             await PopulateFromDN(ParentItem, ParentItem.ADObject.DistinguishedName);
 
+            TreeView1.SelectedItemChanged += treeView_SelectedItemChangeAsync;
             TreeView1.Items.Add(ParentItem);
         }
         public async Task<bool> RunFunctions(string func, IProgress<Tuple<int, string>> data)
@@ -246,28 +247,36 @@ namespace SystemModerator
         #endregion
 
         #region interactions
-        public async void treeItem_SelectedAsync(object sender, RoutedEventArgs e)
-        {         
-            TreeAsset asset = (TreeAsset)sender;
-
-            List_SystemBrowse.Items.Clear();
-            List<ADOrganizationalUnit> OUs = asset.children;
-
-            foreach (var organizationalUnit in OUs)
-            {
-                List_SystemBrowse.Items.Add(organizationalUnit.Name);
-            }
-        }
-        public async void treeItem_ExpandAsync(object sender, RoutedEventArgs e)
+        public async void treeView_SelectedItemChangeAsync(object sender, RoutedEventArgs e)
         {
-            TreeAsset asset = (TreeAsset)sender;
+            try
+            {
+                TreeAsset asset = (TreeAsset)TreeView1.SelectedItem;
+                Trace.WriteLine("Selected " + asset.ADObject.DistinguishedName);
 
-            await PopulateFromDN(asset, asset.ADObject.DistinguishedName);
+                List_SystemBrowse.Items.Clear();
+
+                if (!asset.populated)
+                {
+                    await PopulateFromDN(asset, asset.ADObject.DistinguishedName);
+                }
+
+                List<ADOrganizationalUnit> OUs = asset.children;
+                txt_directorylabel.Content = asset.ADObject.DistinguishedName;
+
+                foreach (var organizationalUnit in OUs)
+                {
+                    List_SystemBrowse.Items.Add(organizationalUnit.Name);
+                }
+            }
+            catch (Exception)
+            {
+
+            }
         }
         public async Task PopulateFromDN(TreeAsset asset, string DN)
         {
-            Trace.WriteLine("Browse to " + DN);
-            List<ADOrganizationalUnit> adInfo = ActiveDirectory.GetOUAt(asset.ADObject.DistinguishedName);
+            List<ADOrganizationalUnit> adInfo = ActiveDirectory.GetOUAt(DN);
 
             if (asset.populated) return;
             if (adInfo == null) { return; }
@@ -277,10 +286,6 @@ namespace SystemModerator
 
                 ChildItem.ADObject = item;
                 ChildItem.Header = item.Name;
-
-                // Send messages to main list box to display assets
-                ChildItem.Expanded += treeItem_ExpandAsync;
-                ChildItem.Selected += treeItem_SelectedAsync;
 
                 ChildItem.Items.Add(new TreeAsset());
 
