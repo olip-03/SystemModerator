@@ -14,6 +14,8 @@ using Newtonsoft.Json;
 using System.Windows.Controls;
 using System.DirectoryServices;
 
+// Icon pack provided by https://github.com/ionic-team/ionicons
+
 namespace SystemModerator
 {
     /// <summary>
@@ -244,48 +246,22 @@ namespace SystemModerator
             });
             return pass;
         }
-        #endregion
-
-        #region interactions
-        public async void treeView_SelectedItemChangeAsync(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                TreeAsset asset = (TreeAsset)TreeView1.SelectedItem;
-                Trace.WriteLine("Selected " + asset.ADObject.DistinguishedName);
-
-                List_SystemBrowse.Items.Clear();
-
-                if (!asset.populated)
-                {
-                    await PopulateFromDN(asset, asset.ADObject.DistinguishedName);
-                }
-
-                List<ADOrganizationalUnit> OUs = asset.children;
-                txt_directorylabel.Content = asset.ADObject.DistinguishedName;
-
-                foreach (var organizationalUnit in OUs)
-                {
-                    List_SystemBrowse.Items.Add(organizationalUnit.Name);
-                }
-            }
-            catch (Exception)
-            {
-
-            }
-        }
         public async Task PopulateFromDN(TreeAsset asset, string DN)
         {
             List<ADOrganizationalUnit> adInfo = ActiveDirectory.GetOUAt(DN);
 
             if (asset.populated) return;
             if (adInfo == null) { return; }
+            if (adInfo.Count == 0) { asset.SetIcon("folder.png"); }
             foreach (ADOrganizationalUnit item in adInfo)
             {
                 TreeAsset ChildItem = new TreeAsset();
 
                 ChildItem.ADObject = item;
-                ChildItem.Header = item.Name;
+                ChildItem.Text = item.Name;
+                ChildItem.SetIcon("folders.png");
+
+                ChildItem.Expanded += treeitem_Expanded;
 
                 ChildItem.Items.Add(new TreeAsset());
 
@@ -306,6 +282,63 @@ namespace SystemModerator
             foreach (TreeAsset item in ToRemove)
             {
                 asset.Items.Remove(item);
+            }
+        }
+        #endregion
+
+        #region interactions
+        public async void treeView_SelectedItemChangeAsync(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                TreeAsset asset = (TreeAsset)TreeView1.SelectedItem;
+                Trace.WriteLine("Selected " + asset.ADObject.DistinguishedName);
+
+                List_SystemBrowse.Items.Clear();
+
+                if (!asset.populated)
+                {
+                    await PopulateFromDN(asset, asset.ADObject.DistinguishedName);
+                }
+
+                // Display OU in Systems List
+                List<ADOrganizationalUnit> OUs = asset.children;
+                txt_directorylabel.Content = asset.ADObject.DistinguishedName;
+                foreach (var organizationalUnit in OUs)
+                {
+                    List_SystemBrowse.Items.Add(organizationalUnit.Name);
+                }
+                // Display Systems in List
+                List<ADComputer> PCs = ActiveDirectory.GetPCAt(asset.ADObject.DistinguishedName);
+                foreach (var PC in PCs)
+                {
+                    List_SystemBrowse.Items.Add(PC.Name);
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+        public async void treeitem_Expanded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                TreeAsset asset = (TreeAsset)sender;
+                if(asset.populated) { return; }
+                await PopulateFromDN(asset, asset.ADObject.DistinguishedName);
+                List<ADOrganizationalUnit> OUs = asset.children;
+                txt_directorylabel.Content = asset.ADObject.DistinguishedName;
+
+                foreach (var organizationalUnit in OUs)
+                {
+                    List_SystemBrowse.Items.Add(organizationalUnit.Name);
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
         #endregion

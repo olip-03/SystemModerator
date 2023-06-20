@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using static System.Net.Mime.MediaTypeNames;
+using System.Windows.Media.Imaging;
 
 namespace SystemModerator.Classes
 {
@@ -22,8 +24,42 @@ namespace SystemModerator.Classes
     public class TreeAsset: TreeViewItem
     { // Default values for unset class
         public ADOrganizationalUnit ADObject { get; set; }
+        public string Text { get; set; }
         public List<ADOrganizationalUnit> children { get; set; } = new List<ADOrganizationalUnit>();
         public bool populated { get; set; } = false;
+        private string currentIcon = null;
+        public void SetIcon(string imagePath)
+        {
+            currentIcon = imagePath;
+            if(currentIcon == null) { return; }
+
+            // create stack panel
+            StackPanel stack = new StackPanel();
+            stack.MaxHeight = 20;
+            stack.Orientation = Orientation.Horizontal;
+
+            // create Image
+            System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+            image.Source = new BitmapImage
+                (new Uri("pack://application:,,,/Resources/TablerIcons/" + imagePath));
+            image.Width = 20;
+            image.Height = 20;
+            // Label
+            TextBlock lbl = new TextBlock();
+            Thickness margin = lbl.Margin;
+            margin.Left = 5;
+            lbl.Margin = margin;
+            lbl.Text = this.Text;
+            lbl.VerticalAlignment = VerticalAlignment.Center;
+            lbl.MaxHeight = 20;
+
+            // Add into stack
+            stack.Children.Add(image);
+            stack.Children.Add(lbl);
+
+            // assign stack to header
+            this.Header = stack;
+        }
     }
     public class Asset
     {

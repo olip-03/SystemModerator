@@ -14,7 +14,13 @@
     <RepositoryUrl>https://github.com/olip-03/SystemModerator</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Resources\TablerIcons\folder.png" />
+    <None Remove="Resources\TablerIcons\folders.png" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Resources\Scripts\Main.ps1" />
+    <Resource Include="Resources\TablerIcons\folder.png" />
+    <Resource Include="Resources\TablerIcons\folders.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
