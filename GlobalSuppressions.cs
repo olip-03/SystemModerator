@@ -7,3 +7,5 @@ using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:SystemModerator.MainWindow.InitTreeView~System.Threading.Tasks.Task")]
 [assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:SystemModerator.Classes.TreeAsset.HasSubdirectories~System.Threading.Tasks.Task{System.Boolean}")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:SystemModerator.MainWindow.Window_Loaded(System.Object,System.Windows.RoutedEventArgs)")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:SystemModerator.Forms.DomainJoin.TestDomainConnection(System.String,System.String,System.String)~System.Threading.Tasks.Task{System.Boolean}")]
