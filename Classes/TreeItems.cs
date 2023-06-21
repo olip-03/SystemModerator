@@ -60,6 +60,31 @@ namespace SystemModerator.Classes
             // assign stack to header
             this.Header = stack;
         }
+        public async Task<bool> HasSubdirectories()
+        {
+            bool pass = false;
+            await Task.Run(() => {
+                DirectoryEntry entry = new DirectoryEntry("LDAP://" + ADObject.DistinguishedName);
+
+                if (String.IsNullOrWhiteSpace(ADObject.DistinguishedName))
+                {
+                    entry = new DirectoryEntry();
+                }
+                DirectorySearcher searcher = new DirectorySearcher
+                {
+                    // specify that you search for organizational units 
+                    SearchRoot = entry,
+                    Filter = "(objectCategory=organizationalUnit)",
+                    SearchScope = SearchScope.OneLevel
+                };
+                foreach (SearchResult result in searcher.FindAll())
+                {
+                    pass = true;
+                    break;
+                }
+            });
+            return pass;
+        }
     }
     public class Asset
     {

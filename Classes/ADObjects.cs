@@ -82,18 +82,19 @@ namespace SystemModerator.Classes
             return adInfo;
         }
     }
-
-    public class ADOrganizationalUnit
+    public class ADObject
     {
         public string Name { get; set; }
         public string ObjectClass { get; set; }
         public string DistinguishedName { get; set; }
     }
-    public class ADComputer
+    public class ADOrganizationalUnit: ADObject
     {
-        public string Name { get; set; }
-        public string ObjectClass { get; set; }
-        public string DistinguishedName { get; set; }
+        public string ObjectClass = "organizationalUnit";
+    }
+    public class ADComputer: ADObject
+    {
+        public string ObjectClass = "computer";
 
     }
 }

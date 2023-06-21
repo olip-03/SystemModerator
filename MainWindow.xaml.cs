@@ -40,6 +40,9 @@ namespace SystemModerator
         // Start application
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // Initalize UI first
+            await InitTreeView();
+
             // Extract any embedded PowerShell Scripts that the application needs in order to run
             await ExtractAll();
             // Loads all the powershell scripts into the powershell instance created
@@ -57,8 +60,6 @@ namespace SystemModerator
                 }
             });
             await RunFunctions("Initialize", progress);
-
-            await InitTreeView();
         }
 
         #region Methods
@@ -253,17 +254,26 @@ namespace SystemModerator
             if (asset.populated) return;
             if (adInfo == null) { return; }
             if (adInfo.Count == 0) { asset.SetIcon("folder.png"); }
+
             foreach (ADOrganizationalUnit item in adInfo)
             {
                 TreeAsset ChildItem = new TreeAsset();
 
                 ChildItem.ADObject = item;
                 ChildItem.Text = item.Name;
-                ChildItem.SetIcon("folders.png");
-
+                
                 ChildItem.Expanded += treeitem_Expanded;
 
-                ChildItem.Items.Add(new TreeAsset());
+                bool hassSubdirectories = await ChildItem.HasSubdirectories();
+                if(hassSubdirectories)
+                {
+                    ChildItem.SetIcon("folders.png");
+                    ChildItem.Items.Add(new TreeAsset());
+                }
+                else
+                {
+                    ChildItem.SetIcon("folder.png");
+                }
 
                 asset.children.Add(item);
                 asset.Items.Add(ChildItem);
@@ -292,7 +302,6 @@ namespace SystemModerator
             try
             {
                 TreeAsset asset = (TreeAsset)TreeView1.SelectedItem;
-                Trace.WriteLine("Selected " + asset.ADObject.DistinguishedName);
 
                 List_SystemBrowse.Items.Clear();
 
@@ -309,11 +318,17 @@ namespace SystemModerator
                     List_SystemBrowse.Items.Add(organizationalUnit.Name);
                 }
                 // Display Systems in List
-                List<ADComputer> PCs = ActiveDirectory.GetPCAt(asset.ADObject.DistinguishedName);
+                List_SystemBrowse.Items.Add("Fetching Assets...");
+                List<ADComputer> PCs = new List<ADComputer>();
+                await Task.Run(() =>
+                {
+                    PCs = ActiveDirectory.GetPCAt(asset.ADObject.DistinguishedName);
+                });
                 foreach (var PC in PCs)
                 {
                     List_SystemBrowse.Items.Add(PC.Name);
                 }
+                List_SystemBrowse.Items.Remove("Fetching Assets...");
             }
             catch (Exception)
             {
@@ -325,8 +340,10 @@ namespace SystemModerator
             try
             {
                 TreeAsset asset = (TreeAsset)sender;
+
                 if(asset.populated) { return; }
                 await PopulateFromDN(asset, asset.ADObject.DistinguishedName);
+
                 List<ADOrganizationalUnit> OUs = asset.children;
                 txt_directorylabel.Content = asset.ADObject.DistinguishedName;
 
