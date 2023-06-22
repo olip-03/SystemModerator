@@ -253,6 +253,7 @@ namespace SystemModerator
 
             if (asset.populated) return;
             if (adInfo == null) { return; }
+
             if (adInfo.Count == 0) { asset.SetIcon("folder.png"); }
 
             foreach (ADOrganizationalUnit item in adInfo)
