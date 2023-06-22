@@ -13,6 +13,8 @@ using SystemModerator.Classes;
 using Newtonsoft.Json;
 using System.Windows.Controls;
 using System.DirectoryServices;
+using SystemModerator.Forms;
+using System.DirectoryServices.AccountManagement;
 
 // Icon pack provided by https://github.com/ionic-team/ionicons
 
@@ -23,7 +25,13 @@ namespace SystemModerator
     /// </summary>
     public partial class MainWindow : Window
     {
+        public string domain = null;
+        public string username = null;
+        public string password = null;
+
         public List<Asset> Assets = new List<Asset>();
+
+        public string domainName = null;
 
         private PowerShell ps = PowerShell.Create();
         private static Dictionary<string, string> resources = new Dictionary<string, string>()
@@ -40,6 +48,31 @@ namespace SystemModerator
         // Start application
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // Check Domain
+            try
+            {
+                domainName = System.DirectoryServices.ActiveDirectory.Domain.GetComputerDomain().ToString();
+            }
+            catch (System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException activeDirectoryNotFound)
+            {
+                DomainJoin domainJoin = new DomainJoin();
+                domainJoin.ShowDialog();
+
+                if(!domainJoin.connected) 
+                {
+                    return;
+                }
+
+                username = domainJoin.username;
+                password = domainJoin.password;
+                domain = domainJoin.domain;
+            }
+            catch(Exception ex)
+            {
+
+                throw;
+            }
+
             // Initalize UI first
             await InitTreeView();
 
@@ -149,10 +182,11 @@ namespace SystemModerator
             List<ADOrganizationalUnit> adInfo = new List<ADOrganizationalUnit>();
 
             // Get info from active directory
-            #pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning disable CA1416 // Validate platform compatibility
             // I only intend for this application to be running on Windows, so this is beyond
             // my concern. If someone wants a linux desktop build of this they can use wine.
-            DirectorySearcher searcher = new DirectorySearcher
+            DirectoryEntry entry = new DirectoryEntry("LDAP://" + domain, username, password);
+            DirectorySearcher searcher = new DirectorySearcher(entry)
             {
                 // specify that you search for organizational units 
                 Filter = "(objectCategory=organizationalUnit)",
@@ -170,7 +204,7 @@ namespace SystemModerator
 
             if (adInfo == null || adInfo.Count <= 0) { return; }
 
-            DirectoryEntry RootDirEntry = new DirectoryEntry("LDAP://RootDSE");
+            DirectoryEntry RootDirEntry = new DirectoryEntry("LDAP://" + domain);
             string distinguishedName = RootDirEntry.Properties["defaultNamingContext"].Value.ToString();
 
             TreeAsset ParentItem = new TreeAsset();
