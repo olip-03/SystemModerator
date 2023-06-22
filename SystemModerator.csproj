@@ -14,13 +14,23 @@
     <RepositoryUrl>https://github.com/olip-03/SystemModerator</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="activity.png" />
+    <None Remove="alert-square.png" />
+    <None Remove="message-cog.png" />
+    <None Remove="Resources\TablerIcons\device-desktop.png" />
     <None Remove="Resources\TablerIcons\folder.png" />
     <None Remove="Resources\TablerIcons\folders.png" />
+    <None Remove="Resources\TablerIcons\server.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Scripts\Main.ps1" />
+    <Resource Include="activity.png" />
+    <Resource Include="alert-square.png" />
+    <Resource Include="message-cog.png" />
+    <Resource Include="Resources\TablerIcons\device-desktop.png" />
     <Resource Include="Resources\TablerIcons\folder.png" />
     <Resource Include="Resources\TablerIcons\folders.png" />
+    <Resource Include="Resources\TablerIcons\server.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

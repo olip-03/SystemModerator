@@ -32,6 +32,7 @@ namespace SystemModerator
         public List<Asset> Assets = new List<Asset>();
 
         public string domainName = null;
+        public bool useDomainLogin = false;
 
         private PowerShell ps = PowerShell.Create();
         private static Dictionary<string, string> resources = new Dictionary<string, string>()
@@ -66,8 +67,9 @@ namespace SystemModerator
                 username = domainJoin.username;
                 password = domainJoin.password;
                 domain = domainJoin.domain;
+                useDomainLogin = true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
                 throw;
@@ -94,7 +96,6 @@ namespace SystemModerator
             });
             await RunFunctions("Initialize", progress);
         }
-
         #region Methods
         public static async Task<bool> ExtractAll()
         {
@@ -182,10 +183,11 @@ namespace SystemModerator
             List<ADOrganizationalUnit> adInfo = new List<ADOrganizationalUnit>();
 
             // Get info from active directory
-#pragma warning disable CA1416 // Validate platform compatibility
+            #pragma warning disable CA1416 // Validate platform compatibility
             // I only intend for this application to be running on Windows, so this is beyond
             // my concern. If someone wants a linux desktop build of this they can use wine.
-            DirectoryEntry entry = new DirectoryEntry("LDAP://" + domain, username, password);
+            DirectoryEntry entry = new DirectoryEntry();
+            if(useDomainLogin) { entry = new DirectoryEntry("LDAP://" + domain, username, password); }
             DirectorySearcher searcher = new DirectorySearcher(entry)
             {
                 // specify that you search for organizational units 
@@ -204,13 +206,17 @@ namespace SystemModerator
 
             if (adInfo == null || adInfo.Count <= 0) { return; }
 
-            DirectoryEntry RootDirEntry = new DirectoryEntry("LDAP://" + domain);
-            string distinguishedName = RootDirEntry.Properties["defaultNamingContext"].Value.ToString();
+            DirectoryEntry RootDirEntry = new DirectoryEntry("LDAP://rootDSE");
+            if (useDomainLogin) { RootDirEntry = new DirectoryEntry("LDAP://" + domain); }
+            string distinguishedName = entry.Properties["distinguishedname"].Value.ToString();
 
             TreeAsset ParentItem = new TreeAsset();
-            ParentItem.Header = distinguishedName;
+            ParentItem.Text = System.Environment.UserDomainName;
             ParentItem.ADObject = new ADOrganizationalUnit();
+            ParentItem.ADObject.DistinguishedName = distinguishedName;
             ParentItem.Name = System.Environment.UserDomainName;
+
+            ParentItem.SetIcon("server.png");
 
             ParentItem.ADObject.DistinguishedName = distinguishedName;
             ParentItem.ADObject.Name = distinguishedName;
@@ -340,6 +346,8 @@ namespace SystemModerator
 
                 List_SystemBrowse.Items.Clear();
 
+                if (asset.populated) { return; }
+
                 if (!asset.populated)
                 {
                     await PopulateFromDN(asset, asset.ADObject.DistinguishedName);
@@ -350,7 +358,12 @@ namespace SystemModerator
                 txt_directorylabel.Content = asset.ADObject.DistinguishedName;
                 foreach (var organizationalUnit in OUs)
                 {
-                    List_SystemBrowse.Items.Add(organizationalUnit.Name);
+                    ADListItem newItem = new ADListItem();
+                    newItem.Text = organizationalUnit.Name;
+
+                    newItem.SetIcon("folder.png");
+
+                    List_SystemBrowse.Items.Add(newItem);
                 }
                 // Display Systems in List
                 List_SystemBrowse.Items.Add("Fetching Assets...");
@@ -361,7 +374,11 @@ namespace SystemModerator
                 });
                 foreach (var PC in PCs)
                 {
-                    List_SystemBrowse.Items.Add(PC.Name);
+                    //device-desktop.png
+                    ADListItem newItem = new ADListItem();
+                    newItem.Text = PC.Name;
+
+                    List_SystemBrowse.Items.Add(newItem);
                 }
                 List_SystemBrowse.Items.Remove("Fetching Assets...");
             }
@@ -377,6 +394,7 @@ namespace SystemModerator
                 TreeAsset asset = (TreeAsset)sender;
 
                 if(asset.populated) { return; }
+
                 await PopulateFromDN(asset, asset.ADObject.DistinguishedName);
 
                 List<ADOrganizationalUnit> OUs = asset.children;

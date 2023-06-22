@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SystemModerator"
         mc:Ignorable="d"
-        Title="System Moderator" Height="456" Width="632" Loaded="Window_Loaded">
+        Title="System Moderator" Height="456" Width="733" Loaded="Window_Loaded"
+        UseLayoutRounding="True">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
@@ -13,8 +14,8 @@
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="207*"/>
-            <ColumnDefinition Width="425*"/>
+            <ColumnDefinition Width="125*"/>
+            <ColumnDefinition Width="191*"/>
         </Grid.ColumnDefinitions>
         <!-- Menu -->
         <Menu Margin="0,0,0,1" Grid.ColumnSpan="2">
@@ -34,14 +35,32 @@
         <!-- Domain Controls -->
         <!-- https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/treeview-overview?view=netframeworkdesktop-4.8 -->
         <TextBox Margin="5,3,70,0" Grid.Row="1" TextWrapping="Wrap" Text="Search" VerticalAlignment="Top" Height="20" Cursor="IBeam"/>
-        <TreeView Name="TreeView1" Margin="5,26,0,0" Grid.Row="1" />
+        <Button Content="Button" HorizontalAlignment="Right" Margin="0,3,0,0" Grid.Row="1" VerticalAlignment="Top" Width="62" Height="20"/>
+        <TreeView Name="TreeView1" Margin="5,26,0,0" Grid.Row="1" >
+            <TreeView.Background>
+                <SolidColorBrush Color="White"/>
+            </TreeView.Background>
+        </TreeView>
         <GridSplitter HorizontalAlignment="Left" Height="auto" Width="5" Grid.Column="1" Grid.RowSpan="2" Margin="0,0,0,29" Grid.Row="1" Background="#00000000"/>
         <!-- Asset Layout -->
         <Label x:Name="txt_directorylabel" Grid.Column="1" Content="Label" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Height="26" Width="516" Margin="5,0,0,0" VerticalContentAlignment="Center"/>
-        <ListBox Name="List_SystemBrowse" Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=50}" Margin="5,26,5,0" Grid.Row="1"/>
+        <ListView Name="List_SystemBrowse" Grid.Column="1" Margin="5,26,5,0" Grid.Row="1">
+            <ListViewItem>
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/activity.png" MaxWidth="20" MaxHeight="20"></Image>
+                    <Label>Hello World</Label>
+                </StackPanel>
+            </ListViewItem>
+            <ListViewItem>
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/activity.png" MaxWidth="20" MaxHeight="20"></Image>
+                    <Label>Hello World</Label>
+                </StackPanel>
+            </ListViewItem>
+        </ListView>
         <!-- Bottom menu bar -->
-        <Grid Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="2" VerticalAlignment="Bottom">
-            <ProgressBar Margin="153,0,5,5" VerticalContentAlignment="Center" VerticalAlignment="Bottom" Height="19" RenderTransformOrigin="0.5,0.5" >
+        <Grid Grid.Row="2" Grid.ColumnSpan="2" VerticalAlignment="Center" Height="29">
+            <ProgressBar Margin="153,0,34,0" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="19" RenderTransformOrigin="0.5,0.5" >
                 <ProgressBar.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleY="-1"/>
@@ -51,8 +70,8 @@
                     </TransformGroup>
                 </ProgressBar.RenderTransform>
             </ProgressBar>
+            <Image HorizontalAlignment="Right" Height="25" VerticalAlignment="Center" Width="25" Source="/message-cog.png" Margin="0,0,5,0" RenderTransformOrigin="0.85,0.474" RenderOptions.BitmapScalingMode="NearestNeighbor" RenderOptions.EdgeMode="Aliased"/>
             <Label Content="Progress: " Margin="5,0,0,0" Width="143" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="29"/>
         </Grid>
-        <Button Content="Button" HorizontalAlignment="Right" Margin="0,3,0,0" Grid.Row="1" VerticalAlignment="Top" Width="62" Height="20"/>
     </Grid>
 </Window>
