@@ -12,14 +12,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace SystemModerator.Forms
+namespace SystemModerator.Forms.Users
 {
     /// <summary>
-    /// Interaction logic for Window1.xaml
+    /// Interaction logic for UserManager.xaml
     /// </summary>
-    public partial class ComputerManager : Window
+    public partial class UserManager : Window
     {
-        public ComputerManager()
+        public UserManager()
         {
             InitializeComponent();
         }

@@ -358,11 +358,7 @@ namespace SystemModerator
                 txt_directorylabel.Content = asset.ADObject.DistinguishedName;
                 foreach (var organizationalUnit in OUs)
                 {
-                    ADListItem newItem = new ADListItem();
-                    newItem.Text = organizationalUnit.Name;
-
-                    newItem.SetIcon("folder.png");
-
+                    ADListItem newItem = new ADListItem(organizationalUnit.Name, "folder.png");
                     List_SystemBrowse.Items.Add(newItem);
                 }
                 // Display Systems in List
@@ -375,9 +371,7 @@ namespace SystemModerator
                 foreach (var PC in PCs)
                 {
                     //device-desktop.png
-                    ADListItem newItem = new ADListItem();
-                    newItem.Text = PC.Name;
-
+                    ADListItem newItem = new ADListItem(PC.Name, "device-desktop.png");
                     List_SystemBrowse.Items.Add(newItem);
                 }
                 List_SystemBrowse.Items.Remove("Fetching Assets...");

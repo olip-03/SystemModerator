@@ -92,10 +92,6 @@ namespace SystemModerator.Classes
         public string Text;
 
         private string currentIcon;
-        public ADListItem()
-        {
-
-        }
         public ADListItem(string text, string currentIcon)
         {
             Text = text;
@@ -104,12 +100,12 @@ namespace SystemModerator.Classes
 
         public void SetIcon(string imagePath)
         {
-            if (currentIcon == null) { return; }
             currentIcon = imagePath;
 
             // create stack panel
             StackPanel stack = new StackPanel();
             stack.MaxHeight = 20;
+            stack.Height = 20;
             stack.Orientation = Orientation.Horizontal;
 
             // create Image
@@ -133,9 +129,8 @@ namespace SystemModerator.Classes
             stack.Children.Add(lbl);
 
             // assign stack to header
-            this.Height = 20;
             this.Content = stack;
-            this.UpdateLayout();
+            this.Height = 20;
         }
     }
     public class ADObject

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SystemModerator"
         mc:Ignorable="d"
-        Title="System Moderator" Height="456" Width="733" Loaded="Window_Loaded"
+        Title="System Moderator" Height="456" Width="544" Loaded="Window_Loaded"
         UseLayoutRounding="True">
     <Grid>
         <Grid.RowDefinitions>
@@ -19,12 +19,26 @@
         </Grid.ColumnDefinitions>
         <!-- Menu -->
         <Menu Margin="0,0,0,1" Grid.ColumnSpan="2">
-            <MenuItem Header="_Edit" VerticalContentAlignment="Stretch" Height="24">
+            <MenuItem Header="_File" VerticalContentAlignment="Stretch" Height="24">
                 <MenuItem Command="ApplicationCommands.Copy"/>
                 <MenuItem Command="ApplicationCommands.Cut"/>
                 <MenuItem Command="ApplicationCommands.Paste"/>
             </MenuItem>
-            <MenuItem Header="_Font" Height="24" VerticalContentAlignment="Stretch">
+            <MenuItem Header="_User" Height="24" VerticalContentAlignment="Stretch">
+                <MenuItem Header="_Bold" IsCheckable="True"/>
+                <MenuItem Header="_Italic" IsCheckable="True"/>
+                <Separator/>
+                <MenuItem Header="I_ncrease Font Size"/>
+                <MenuItem Header="_Decrease Font Size"/>
+            </MenuItem>
+            <MenuItem Header="_Device" Height="24" VerticalContentAlignment="Stretch">
+                <MenuItem Header="_Bold" IsCheckable="True"/>
+                <MenuItem Header="_Italic" IsCheckable="True"/>
+                <Separator/>
+                <MenuItem Header="I_ncrease Font Size"/>
+                <MenuItem Header="_Decrease Font Size"/>
+            </MenuItem>
+            <MenuItem Header="_View" Height="24" VerticalContentAlignment="Stretch">
                 <MenuItem Header="_Bold" IsCheckable="True"/>
                 <MenuItem Header="_Italic" IsCheckable="True"/>
                 <Separator/>
@@ -32,6 +46,8 @@
                 <MenuItem Header="_Decrease Font Size"/>
             </MenuItem>
         </Menu>
+        <!-- Toolbar -->
+
         <!-- Domain Controls -->
         <!-- https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/treeview-overview?view=netframeworkdesktop-4.8 -->
         <TextBox Margin="5,3,70,0" Grid.Row="1" TextWrapping="Wrap" Text="Search" VerticalAlignment="Top" Height="20" Cursor="IBeam"/>
@@ -43,7 +59,7 @@
         </TreeView>
         <GridSplitter HorizontalAlignment="Left" Height="auto" Width="5" Grid.Column="1" Grid.RowSpan="2" Margin="0,0,0,29" Grid.Row="1" Background="#00000000"/>
         <!-- Asset Layout -->
-        <Label x:Name="txt_directorylabel" Grid.Column="1" Content="Label" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Height="26" Width="516" Margin="5,0,0,0" VerticalContentAlignment="Center"/>
+        <Label x:Name="txt_directorylabel" Grid.Column="1" Content="Label" Grid.Row="1" VerticalAlignment="Top" Height="26" VerticalContentAlignment="Center" Margin="5,0,5,0"/>
         <ListView Name="List_SystemBrowse" Grid.Column="1" Margin="5,26,5,0" Grid.Row="1">
             <ListViewItem>
                 <StackPanel Orientation="Horizontal">
