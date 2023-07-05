@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows;
@@ -12,6 +10,19 @@ namespace SystemModerator.Classes
 {
     public static class ActiveDirectory
     {
+        public static Dictionary<string, string> GetComputer(string DN)
+        {
+            //Get the Container for the Computer
+            DirectoryEntry deContainer = new DirectoryEntry("LDAP://" + DN);
+
+            Dictionary<string, string> pcData = new Dictionary<string, string>();
+            foreach (var item in deContainer.Properties)
+            {
+                string test = item.ToString(); 
+                //pcData.Add(item, item);
+            }
+            return pcData;
+        }
         public static List<ADOrganizationalUnit> GetOUAt()
         {
             return GetOUAt("");
@@ -130,7 +141,7 @@ namespace SystemModerator.Classes
 
             // assign stack to header
             this.Content = stack;
-            this.Height = 20;
+            this.Height = 25;
         }
     }
     public class ADObject

@@ -71,7 +71,6 @@ namespace SystemModerator
             }
             catch (Exception ex)
             {
-
                 throw;
             }
 
@@ -305,7 +304,7 @@ namespace SystemModerator
                 
                 ChildItem.Expanded += treeitem_Expanded;
 
-                bool hassSubdirectories = await ChildItem.HasSubdirectories();
+                bool hassSubdirectories = await ChildItem.HasSubdirectoriesAsync();
                 if(hassSubdirectories)
                 {
                     ChildItem.SetIcon("folders.png");
@@ -335,6 +334,10 @@ namespace SystemModerator
                 asset.Items.Remove(item);
             }
         }
+        public void UpdateBrowseView(string DN)
+        {
+
+        }
         #endregion
 
         #region interactions
@@ -363,17 +366,36 @@ namespace SystemModerator
                 }
                 // Display Systems in List
                 List_SystemBrowse.Items.Add("Fetching Assets...");
-                List<ADComputer> PCs = new List<ADComputer>();
-                await Task.Run(() =>
-                {
-                    PCs = ActiveDirectory.GetPCAt(asset.ADObject.DistinguishedName);
+
+                IProgress<ADListItem[]> progress = new Progress<ADListItem[]>(data =>
+                { // Create progress reporter
+                    if (data != null)
+                    {
+                        Application.Current.Dispatcher.Invoke((Action)delegate {
+                            // your code
+                            List_SystemBrowse.Items.Add(data);
+                        });
+                    }
                 });
-                foreach (var PC in PCs)
-                {
-                    //device-desktop.png
-                    ADListItem newItem = new ADListItem(PC.Name, "device-desktop.png");
-                    List_SystemBrowse.Items.Add(newItem);
-                }
+                await Task.Run(() => {
+                    List<ADComputer> PCs = ActiveDirectory.GetPCAt(asset.ADObject.DistinguishedName);
+                    List<ADListItem> toAdd = new List<ADListItem>();
+
+                    int ratecount = 0;
+                    foreach (var PC in PCs)
+                    {
+                        ratecount++;
+                        toAdd.Add(new ADListItem(PC.Name, "device-desktop.png"));
+
+                        if (ratecount >= 50)
+                        {
+                            ratecount = 0;
+                            progress.Report(toAdd.ToArray());
+                            toAdd.Clear();
+                        }
+                    }
+                });
+
                 List_SystemBrowse.Items.Remove("Fetching Assets...");
             }
             catch (Exception)
@@ -401,7 +423,6 @@ namespace SystemModerator
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
