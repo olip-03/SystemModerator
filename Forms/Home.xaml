@@ -75,7 +75,7 @@
         </ListView>
         <!-- Bottom menu bar -->
         <Grid Grid.Row="2" Grid.ColumnSpan="2" VerticalAlignment="Center" Height="29">
-            <ProgressBar Margin="153,0,34,0" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="19" RenderTransformOrigin="0.5,0.5" >
+            <ProgressBar x:Name="prog_mainProgress" Margin="153,0,34,0" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="19" RenderTransformOrigin="0.5,0.5" >
                 <ProgressBar.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleY="-1"/>
