@@ -39,6 +39,8 @@
     <Page Remove="Resources\VSIcons\FolderClosed\FolderClosed_16x.xaml" />
     <Page Remove="Resources\VSIcons\FolderClosed\FolderClosed_grey_16x.xaml" />
     <Page Remove="Resources\VSIcons\FolderOpened\FolderOpened_16x.xaml" />
+    <Page Remove="Resources\VSIcons\FolderSearchClosed\FolderSearchClosed_16x.xaml" />
+    <Page Remove="Resources\VSIcons\FolderSearchOpened\FolderSearchOpened_16x.xaml" />
     <Page Remove="Resources\VSIcons\LocalServer\LocalServer_16x.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -53,6 +55,10 @@
     <Resource Include="Resources\VSIcons\FolderClosed\FolderClosed_16x.xaml" />
     <Resource Include="Resources\VSIcons\FolderClosed\FolderClosed_grey_16x.xaml" />
     <Resource Include="Resources\VSIcons\FolderOpened\FolderOpened_16x.xaml" />
+    <Resource Include="Resources\VSIcons\FolderSearchClosed\FolderSearchClosed_16x.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Resource>
+    <Resource Include="Resources\VSIcons\FolderSearchOpened\FolderSearchOpened_16x.xaml" />
     <Resource Include="Resources\VSIcons\LocalServer\LocalServer_16x.xaml" />
   </ItemGroup>
   <ItemGroup>

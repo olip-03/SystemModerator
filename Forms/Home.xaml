@@ -24,8 +24,8 @@
                 <MenuItem Command="ApplicationCommands.Paste"/>
             </MenuItem>
             <MenuItem Header="_User" Height="24" VerticalContentAlignment="Stretch">
-                <MenuItem Header="_Bold" IsCheckable="True"/>
-                <MenuItem Header="_Italic" IsCheckable="True"/>
+                <MenuItem Header="_Add User"/>
+                <MenuItem Header="_Delete User"/>
                 <Separator/>
                 <MenuItem Header="I_ncrease Font Size"/>
                 <MenuItem Header="_Decrease Font Size"/>

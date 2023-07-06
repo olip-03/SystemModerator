@@ -32,6 +32,7 @@ namespace SystemModerator.Classes
         public string Text { get; set; }
         public List<ADOrganizationalUnit> children { get; set; } = new List<ADOrganizationalUnit>();
         public bool populated { get; set; } = false;
+        public bool hasSubDirectories = false;
         public bool ignoreExpansionPopulation = false;
         private string currentIcon = null;
         public void SetXamlIcon(string imagePath)
@@ -128,6 +129,7 @@ namespace SystemModerator.Classes
                 pass = true;
                 break;
             }
+            hasSubDirectories = pass;
             return pass;
         }
         public async Task<bool> HasSubdirectoriesAsync()
@@ -153,6 +155,7 @@ namespace SystemModerator.Classes
                     break;
                 }
             });
+            hasSubDirectories = pass;
             return pass;
         }
     }

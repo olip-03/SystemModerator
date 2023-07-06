@@ -190,50 +190,56 @@ namespace SystemModerator.Forms
                     {
                         // specify that you search for organizational units 
                         SearchRoot = entry,
-                        Filter = "(objectCategory=organizationalUnit)",
                         SearchScope = SearchScope.OneLevel
                     };
 
                     foreach (SearchResult result in searcher.FindAll())
                     {
-                        string objectClass = result.Properties["objectclass"].OfType<string>().First();
-                        string distinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
-                        string name = result.Properties["name"].OfType<string>().First();
-
-                        this.Dispatcher.Invoke(() =>
+                        try
                         {
-                            ADOrganizationalUnit adinfo = new ADOrganizationalUnit();
-                            adinfo.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
-                            adinfo.Name = result.Properties["name"].OfType<string>().First();
-                            adinfo.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
+                            string objectClass = result.Properties["objectclass"].OfType<string>().Last();
+                            string distinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
+                            string name = result.Properties["name"].OfType<string>().First();
 
-                            ADListItem newItem = new ADListItem(name, "FolderClosed/FolderClosed_16x.xaml");
-                            newItem.ADObject = adinfo;
-                            newItem.MouseDoubleClick += ListItem_DoubleClick;
-                            List_SystemBrowse.Items.Add(newItem);
-
-                            TreeAsset ChildItem = new TreeAsset();
-                            ChildItem.Text = result.Properties["name"].OfType<string>().First();
-                            ChildItem.ADObject = adinfo;
-
-                            ChildItem.Expanded += TreeItem_Expanded;
-                            bool hassSubdirectories = ChildItem.HasSubdirectories();
-                            if (hassSubdirectories)
+                            this.Dispatcher.Invoke(() =>
                             {
-                                ChildItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
-                                newItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
-                                ChildItem.Items.Add(new TreeAsset());
-                            }
-                            else
-                            {
-                                ChildItem.SetXamlIcon("FolderClosed/FolderClosed_16x.xaml");
-                            }
+                                ADOrganizationalUnit adinfo = new ADOrganizationalUnit();
+                                adinfo.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
+                                adinfo.Name = result.Properties["name"].OfType<string>().First();
+                                adinfo.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
 
-                            if (!asset.populated)
-                            {
-                                asset.Items.Add(ChildItem);
-                            }
-                        });
+                                ADListItem newItem = new ADListItem(name, "FolderClosed/FolderClosed_16x.xaml");
+                                newItem.ADObject = adinfo;
+                                newItem.MouseDoubleClick += ListItem_DoubleClick;
+                                List_SystemBrowse.Items.Add(newItem);
+
+                                TreeAsset ChildItem = new TreeAsset();
+                                ChildItem.Text = result.Properties["name"].OfType<string>().First();
+                                ChildItem.ADObject = adinfo;
+
+                                ChildItem.Expanded += TreeItem_Expanded;
+                                bool hassSubdirectories = ChildItem.HasSubdirectories();
+                                if (hassSubdirectories)
+                                {
+                                    ChildItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
+                                    newItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
+                                    ChildItem.Items.Add(new TreeAsset());
+                                }
+                                else
+                                {
+                                    ChildItem.SetXamlIcon("FolderClosed/FolderClosed_16x.xaml");
+                                }
+
+                                if (!asset.populated && objectClass == "organizationalUnit")
+                                {
+                                    asset.Items.Add(ChildItem);
+                                }
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            Trace.WriteLine(ex);
+                        }
                     }
 
                     asset.populated = true;
