@@ -21,23 +21,39 @@
     <WarningLevel>5</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="activity.png" />
-    <None Remove="alert-square.png" />
-    <None Remove="message-cog.png" />
+    <Compile Remove="Resources\vswin2019\**" />
+    <EmbeddedResource Remove="Resources\vswin2019\**" />
+    <None Remove="Resources\vswin2019\**" />
+    <Page Remove="Resources\vswin2019\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Forms\arrow-badge-left.png" />
     <None Remove="Resources\TablerIcons\device-desktop.png" />
     <None Remove="Resources\TablerIcons\folder.png" />
     <None Remove="Resources\TablerIcons\folders.png" />
     <None Remove="Resources\TablerIcons\server.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Remove="Resources\VSIcons\Backwards\Backwards_16x.xaml" />
+    <Page Remove="Resources\VSIcons\Backwards\Backwards_disabled_16x.xaml" />
+    <Page Remove="Resources\VSIcons\FolderClosed\FolderClosed_16x.xaml" />
+    <Page Remove="Resources\VSIcons\FolderClosed\FolderClosed_grey_16x.xaml" />
+    <Page Remove="Resources\VSIcons\FolderOpened\FolderOpened_16x.xaml" />
+    <Page Remove="Resources\VSIcons\LocalServer\LocalServer_16x.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Resources\Scripts\Main.ps1" />
-    <Resource Include="activity.png" />
-    <Resource Include="alert-square.png" />
-    <Resource Include="message-cog.png" />
+    <Resource Include="Forms\arrow-badge-left.png" />
     <Resource Include="Resources\TablerIcons\device-desktop.png" />
     <Resource Include="Resources\TablerIcons\folder.png" />
     <Resource Include="Resources\TablerIcons\folders.png" />
     <Resource Include="Resources\TablerIcons\server.png" />
+    <Resource Include="Resources\VSIcons\Backwards\Backwards_16x.xaml" />
+    <Resource Include="Resources\VSIcons\Backwards\Backwards_disabled_16x.xaml" />
+    <Resource Include="Resources\VSIcons\FolderClosed\FolderClosed_16x.xaml" />
+    <Resource Include="Resources\VSIcons\FolderClosed\FolderClosed_grey_16x.xaml" />
+    <Resource Include="Resources\VSIcons\FolderOpened\FolderOpened_16x.xaml" />
+    <Resource Include="Resources\VSIcons\LocalServer\LocalServer_16x.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

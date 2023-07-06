@@ -65,7 +65,7 @@ namespace SystemModerator.Forms
                     // which will populate the treeview
                     ParentItem.IsSelected = true;
                     ParentItem.IsExpanded = true;
-                    ParentItem.SetIcon("server.png");
+                    ParentItem.SetXamlIcon("LocalServer/LocalServer_16x.xaml");
                     Tree_Browse.Items.Add(ParentItem);
                 });
                 
@@ -136,12 +136,12 @@ namespace SystemModerator.Forms
                                 bool hassSubdirectories = ChildItem.HasSubdirectories();
                                 if (hassSubdirectories)
                                 {
-                                    ChildItem.SetIcon("folders.png");
+                                    ChildItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
                                     ChildItem.Items.Add(new TreeAsset());
                                 }
                                 else
                                 {
-                                    ChildItem.SetIcon("folder.png");
+                                    ChildItem.SetXamlIcon("FolderClosed/FolderClosed_16x.xaml");
                                 }
                                 asset.Items.Add(ChildItem);
                             });
@@ -207,7 +207,7 @@ namespace SystemModerator.Forms
                             adinfo.Name = result.Properties["name"].OfType<string>().First();
                             adinfo.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
 
-                            ADListItem newItem = new ADListItem(name, "folder.png");
+                            ADListItem newItem = new ADListItem(name, "FolderClosed/FolderClosed_16x.xaml");
                             newItem.ADObject = adinfo;
                             newItem.MouseDoubleClick += ListItem_DoubleClick;
                             List_SystemBrowse.Items.Add(newItem);
@@ -220,13 +220,13 @@ namespace SystemModerator.Forms
                             bool hassSubdirectories = ChildItem.HasSubdirectories();
                             if (hassSubdirectories)
                             {
-                                ChildItem.SetIcon("folders.png");
-                                newItem.SetIcon("folders.png");
+                                ChildItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
+                                newItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
                                 ChildItem.Items.Add(new TreeAsset());
                             }
                             else
                             {
-                                ChildItem.SetIcon("folder.png");
+                                ChildItem.SetXamlIcon("FolderClosed/FolderClosed_16x.xaml");
                             }
 
                             if (!asset.populated)

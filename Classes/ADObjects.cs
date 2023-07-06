@@ -5,6 +5,8 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows;
+using System.IO;
+using System.Windows.Resources;
 
 namespace SystemModerator.Classes
 {
@@ -107,9 +109,48 @@ namespace SystemModerator.Classes
         public ADListItem(string text, string currentIcon)
         {
             Text = text;
-            SetIcon(currentIcon);
+            SetXamlIcon(currentIcon);
         }
+        public void SetXamlIcon(string imagePath)
+        {
+            currentIcon = imagePath;
+            if (currentIcon == null) { return; }
 
+            // create stack panel
+            StackPanel stack = new StackPanel();
+            stack.MaxHeight = 20;
+            stack.Orientation = Orientation.Horizontal;
+
+            // Load Image
+            Viewbox canvas = new Viewbox();
+            StreamResourceInfo sri = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/Resources/VSIcons/" + imagePath));
+            if (sri != null)
+            {
+                using (Stream s = sri.Stream)
+                {
+                    canvas = (Viewbox)System.Windows.Markup.XamlReader.Load(s);
+                }
+            }
+            canvas.VerticalAlignment = VerticalAlignment.Center;
+            canvas.Height = 16;
+            canvas.Width = 16;
+
+            // Label
+            TextBlock lbl = new TextBlock();
+            Thickness margin = lbl.Margin;
+            margin.Left = 5;
+            lbl.Margin = margin;
+            lbl.Text = this.Text;
+            lbl.VerticalAlignment = VerticalAlignment.Center;
+            lbl.MaxHeight = 20;
+
+            // Add into stack
+            stack.Children.Add(canvas);
+            stack.Children.Add(lbl);
+
+            // assign stack to header
+            this.Content = stack;
+        }
         public void SetIcon(string imagePath)
         {
             currentIcon = imagePath;
