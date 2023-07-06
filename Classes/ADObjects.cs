@@ -101,6 +101,7 @@ namespace SystemModerator.Classes
     public class ADListItem : ListViewItem
     {
         public string Text;
+        public ADOrganizationalUnit ADObject { get; set; }
 
         private string currentIcon;
         public ADListItem(string text, string currentIcon)

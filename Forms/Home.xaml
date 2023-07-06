@@ -51,7 +51,7 @@
         <!-- https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/treeview-overview?view=netframeworkdesktop-4.8 -->
         <TextBox Margin="5,3,70,0" Grid.Row="1" TextWrapping="Wrap" Text="Search" VerticalAlignment="Top" Height="20" Cursor="IBeam"/>
         <Button Content="Button" HorizontalAlignment="Right" Margin="0,3,0,0" Grid.Row="1" VerticalAlignment="Top" Width="62" Height="20"/>
-        <TreeView x:Name="Tree_Browse" Margin="5,26,0,0" Grid.Row="1" SelectedItemChanged="Tree_Browse_SelectedItemChanged" >
+        <TreeView x:Name="Tree_Browse" Margin="5,26,0,0" Grid.Row="1" SelectedItemChanged="Tree_Browse_SelectedItemChanged" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
             <TreeView.Background>
                 <SolidColorBrush Color="White"/>
             </TreeView.Background>

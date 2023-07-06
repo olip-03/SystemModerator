@@ -13,16 +13,6 @@ using SystemModerator.Classes;
 
 namespace SystemModerator.Forms
 {
-    public class ADThreadWorker
-    {
-        string searchbase;
-        private ADCallback_OU OUCallback;
-        public ADThreadWorker(ADCallback_OU orgunitCallback)
-        {
-            OUCallback = orgunitCallback;
-        }
-    }
-    public delegate void ADCallback_OU(ADOrganizationalUnit orgunit);
     /// <summary>
     /// Interaction logic for Home.xaml
     /// </summary>
@@ -70,66 +60,42 @@ namespace SystemModerator.Forms
 
                     txt_directorylabel.Content = distinguishedName;
 
+                    // By setting the IsSelected variable to true here, we also
+                    // signal the TreeView's Tree_Browse_SelectedItemChanged method
+                    // which will populate the treeview
+                    ParentItem.IsSelected = true;
+                    ParentItem.IsExpanded = true;
                     ParentItem.SetIcon("server.png");
                     Tree_Browse.Items.Add(ParentItem);
                 });
-
-                DirectorySearcher searcher = new DirectorySearcher
-                {
-                    // specify that you search for organizational units 
-                    SearchRoot = entry,
-                    Filter = "(objectCategory=organizationalUnit)",
-                    SearchScope = SearchScope.OneLevel
-                };
-
-                foreach (SearchResult result in searcher.FindAll())
-                {
-                    ADOrganizationalUnit item = new ADOrganizationalUnit();
-                    item.Name = result.Properties["name"].OfType<string>().First();
-                    item.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
-                    item.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
-
-                    // return to callback
-                    // OUCallback(item);
-                    this.Dispatcher.Invoke(() => {
-                        TreeAsset ChildItem = new TreeAsset();
-                        ChildItem.Text = result.Properties["name"].OfType<string>().First();
-                        ChildItem.ADObject = new ADOrganizationalUnit();
-                        ChildItem.ADObject.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
-                        ChildItem.ADObject.Name = result.Properties["name"].OfType<string>().First();
-                        ChildItem.ADObject.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
-
-                        ChildItem.Expanded += TreeItem_Expanded;
-
-                        ADListItem newItem = new ADListItem(ChildItem.ADObject.Name, "folder.png");
-
-                        bool hassSubdirectories = ChildItem.HasSubdirectories();
-                        if (hassSubdirectories)
-                        {
-                            ChildItem.SetIcon("folders.png");
-                            newItem.SetIcon("folders.png");
-                            ChildItem.Items.Add(new TreeAsset());
-                        }
-                        else
-                        {
-                            ChildItem.SetIcon("folder.png");
-                        }
-
-                        List_SystemBrowse.Items.Add(newItem);
-                        ParentItem.Items.Add(ChildItem);
-                    });
-                }
+                
                 #pragma warning restore CA1416 // Validate platform compatibility
             }).Start();
+
             initalized = true;
         }
 
         #region interactions
+        /// <summary>
+        /// Occurs when a TreeItem with children is opened via the arrow dropdown
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TreeItem_Expanded(object sender, RoutedEventArgs e)
         {
             if(sender is TreeAsset)
             {
                 TreeAsset asset = sender as TreeAsset;
+
+                // neccesary for the ListItem_DoubleClick event
+                if (asset.ignoreExpansionPopulation) 
+                {
+                    // reset the flag once were done so we don't always skip
+                    // this event
+                    asset.ignoreExpansionPopulation = false;
+                    return; 
+                }
+
                 if(!asset.populated)
                 {
                     asset.Items.Clear();
@@ -187,6 +153,11 @@ namespace SystemModerator.Forms
                 }
             }
         }
+        /// <summary>
+        /// Occurs when the selected item in the tree view is changed (something else is selected)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Tree_Browse_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if(sender is TreeView) 
@@ -225,35 +196,41 @@ namespace SystemModerator.Forms
 
                     foreach (SearchResult result in searcher.FindAll())
                     {
-                        string name = result.Properties["name"].OfType<string>().First();
                         string objectClass = result.Properties["objectclass"].OfType<string>().First();
                         string distinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
+                        string name = result.Properties["name"].OfType<string>().First();
 
                         this.Dispatcher.Invoke(() =>
                         {
+                            ADOrganizationalUnit adinfo = new ADOrganizationalUnit();
+                            adinfo.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
+                            adinfo.Name = result.Properties["name"].OfType<string>().First();
+                            adinfo.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
+
                             ADListItem newItem = new ADListItem(name, "folder.png");
+                            newItem.ADObject = adinfo;
+                            newItem.MouseDoubleClick += ListItem_DoubleClick;
                             List_SystemBrowse.Items.Add(newItem);
 
-                            if(!asset.populated)
+                            TreeAsset ChildItem = new TreeAsset();
+                            ChildItem.Text = result.Properties["name"].OfType<string>().First();
+                            ChildItem.ADObject = adinfo;
+
+                            ChildItem.Expanded += TreeItem_Expanded;
+                            bool hassSubdirectories = ChildItem.HasSubdirectories();
+                            if (hassSubdirectories)
                             {
-                                TreeAsset ChildItem = new TreeAsset();
-                                ChildItem.Text = result.Properties["name"].OfType<string>().First();
-                                ChildItem.ADObject = new ADOrganizationalUnit();
-                                ChildItem.ADObject.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
-                                ChildItem.ADObject.Name = result.Properties["name"].OfType<string>().First();
-                                ChildItem.ADObject.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
-                                ChildItem.Expanded += TreeItem_Expanded;
-                                bool hassSubdirectories = ChildItem.HasSubdirectories();
-                                if (hassSubdirectories)
-                                {
-                                    ChildItem.SetIcon("folders.png");
-                                    newItem.SetIcon("folders.png");
-                                    ChildItem.Items.Add(new TreeAsset());
-                                }
-                                else
-                                {
-                                    ChildItem.SetIcon("folder.png");
-                                }
+                                ChildItem.SetIcon("folders.png");
+                                newItem.SetIcon("folders.png");
+                                ChildItem.Items.Add(new TreeAsset());
+                            }
+                            else
+                            {
+                                ChildItem.SetIcon("folder.png");
+                            }
+
+                            if (!asset.populated)
+                            {
                                 asset.Items.Add(ChildItem);
                             }
                         });
@@ -262,6 +239,51 @@ namespace SystemModerator.Forms
                     asset.populated = true;
                     #pragma warning restore CA1416 // Validate platform compatibility
                 }).Start();
+            }
+        }
+        /// <summary>
+        /// Occurs when an item in the list view is double clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ListItem_DoubleClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is ADListItem)
+            {
+                ADListItem listItem = sender as ADListItem;
+
+                TreeAsset selectedItem = Tree_Browse.SelectedItem as TreeAsset;
+
+                if(!selectedItem.IsExpanded)
+                {
+                    selectedItem.ignoreExpansionPopulation = true;
+
+                    selectedItem.IsExpanded = true;
+                }
+
+                if(!selectedItem.populated)
+                {
+                    RoutedEvent ConditionalClickEvent = EventManager.RegisterRoutedEvent(
+                    name: "ConditionalClick",
+                    routingStrategy: RoutingStrategy.Bubble,
+                    handlerType: typeof(RoutedEventHandler),
+                    ownerType: typeof(TreeAsset));
+                    RoutedEventArgs routedEventArgs = new(routedEvent: ConditionalClickEvent);
+
+                    TreeItem_Expanded(selectedItem, routedEventArgs);
+                }
+                foreach (var item in selectedItem.Items)
+                {
+                    TreeAsset asset = item as TreeAsset;
+                    if(asset.ADObject.DistinguishedName == listItem.ADObject.DistinguishedName)
+                    {
+                        asset.ignoreExpansionPopulation = true;
+
+                        asset.IsExpanded = true;
+                        asset.IsSelected = true; // selecting asset will populate it 
+                        break;
+                    }
+                }
             }
         }
         #endregion

@@ -27,6 +27,7 @@ namespace SystemModerator.Classes
         public string Text { get; set; }
         public List<ADOrganizationalUnit> children { get; set; } = new List<ADOrganizationalUnit>();
         public bool populated { get; set; } = false;
+        public bool ignoreExpansionPopulation = false;
         private string currentIcon = null;
         public void SetIcon(string imagePath)
         {
