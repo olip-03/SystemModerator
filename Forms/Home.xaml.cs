@@ -179,9 +179,11 @@ namespace SystemModerator.Forms
                 {
                     string search = "LDAP://" + asset.ADObject.DistinguishedName;
 
-                    #pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning disable CA1416 // Validate platform compatibility
                     // I only intend for this application to be running on Windows, so this is beyond
                     // my concern. If someone wants a linux desktop build of this they can use wine.'
+
+                    // TODO: Redo data loading in from AD so its presented correctly, 
 
                     // Fetch all OU's
                     List<ADOrganizationalUnit> adInfo = new List<ADOrganizationalUnit>();
