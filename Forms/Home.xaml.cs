@@ -18,6 +18,9 @@ namespace SystemModerator.Forms
     /// </summary>
     public partial class Home : Window
     {
+        private Thread browseThread;
+        private bool stopBrowseThread = false;
+
         public Home()
         {
             InitializeComponent();
@@ -44,10 +47,9 @@ namespace SystemModerator.Forms
                 // Create root DirectoryEntry
                 // TODO: Replace with global static DirectoryEntry that is set on start.
                 DirectoryEntry entry = new DirectoryEntry();
-
                 string distinguishedName = entry.Properties["distinguishedname"].Value.ToString();
-                TreeAsset ParentItem = null;
 
+                TreeAsset ParentItem = null;
                 this.Dispatcher.Invoke(() =>
                 {
                     ParentItem = new TreeAsset();
@@ -55,7 +57,7 @@ namespace SystemModerator.Forms
                     ParentItem.ADObject = new ADOrganizationalUnit();
                     ParentItem.ADObject.DistinguishedName = distinguishedName;
                     ParentItem.ADObject.Name = distinguishedName;
-                    ParentItem.ADObject.ObjectClass = "organizationalUnit";
+                    ParentItem.ADObject.ObjectClass = new string[] { "organizationalUnit" };
                     ParentItem.Name = System.Environment.UserDomainName;
 
                     txt_directorylabel.Content = distinguishedName;
@@ -68,11 +70,31 @@ namespace SystemModerator.Forms
                     ParentItem.SetXamlIcon("LocalServer/LocalServer_16x.xaml");
                     Tree_Browse.Items.Add(ParentItem);
                 });
-                
                 #pragma warning restore CA1416 // Validate platform compatibility
             }).Start();
 
             initalized = true;
+        }
+        /// <summary>
+        /// Loads assets from AD to be populated into memory, with progress reporter for real time feedback
+        /// </summary>
+        /// <param name="dn">Distinguished Name</param>
+        /// <param name="data">Progress reporter providing data as it is retreived from Active Directory</param>
+        public SearchResultCollection LoadAssetsFromDN(string dn)
+        {
+            string search = "LDAP://" + dn;
+
+            // Fetch all OU's
+            List<ADOrganizationalUnit> adInfo = new List<ADOrganizationalUnit>();
+            DirectoryEntry entry = new DirectoryEntry(search);
+            DirectorySearcher searcher = new DirectorySearcher
+            {
+                // specify that you search for organizational units 
+                SearchRoot = entry,
+                SearchScope = SearchScope.OneLevel
+            };
+
+            return searcher.FindAll();
         }
 
         #region interactions
@@ -103,7 +125,7 @@ namespace SystemModerator.Forms
                     {
                         string search = "LDAP://" + asset.ADObject.DistinguishedName;
 
-                        #pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning disable CA1416 // Validate platform compatibility
                         // I only intend for this application to be running on Windows, so this is beyond
                         // my concern. If someone wants a linux desktop build of this they can use wine.'
 
@@ -121,7 +143,7 @@ namespace SystemModerator.Forms
                         foreach (SearchResult result in searcher.FindAll())
                         {
                             string name = result.Properties["name"].OfType<string>().First();
-                            string objectClass = result.Properties["objectclass"].OfType<string>().First();
+                            string[] objectClass = result.Properties["objectclass"].OfType<string>().ToArray();
                             string distinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
 
                             this.Dispatcher.Invoke(() =>
@@ -131,7 +153,7 @@ namespace SystemModerator.Forms
                                 ChildItem.ADObject = new ADOrganizationalUnit();
                                 ChildItem.ADObject.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
                                 ChildItem.ADObject.Name = result.Properties["name"].OfType<string>().First();
-                                ChildItem.ADObject.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
+                                ChildItem.ADObject.ObjectClass = result.Properties["objectclass"].OfType<string>().ToArray(); ;
                                 ChildItem.Expanded += TreeItem_Expanded;
                                 bool hassSubdirectories = ChildItem.HasSubdirectories();
                                 if (hassSubdirectories)
@@ -148,7 +170,7 @@ namespace SystemModerator.Forms
                         }
 
                         asset.populated = true;
-                        #pragma warning restore CA1416 // Validate platform compatibility
+#pragma warning restore CA1416 // Validate platform compatibility
                     }).Start();
                 }
             }
@@ -166,87 +188,96 @@ namespace SystemModerator.Forms
                 TreeAsset asset = treeView.SelectedItem as TreeAsset;
 
                 List_SystemBrowse.Items.Clear();
-                this.Dispatcher.Invoke(() =>
+                txt_directorylabel.Content = asset.ADObject.DistinguishedName;
+                if (!asset.populated)
                 {
-                    txt_directorylabel.Content = asset.ADObject.DistinguishedName;
-                    if(!asset.populated)
-                    {
-                        asset.Items.Clear();
-                    }
-                });
+                    asset.Items.Clear();
+                }
 
-                new Thread(() =>
+                if(browseThread !=  null) { if (browseThread.ThreadState == System.Threading.ThreadState.Running) { stopBrowseThread = true; } }
+                browseThread = new Thread(() =>
                 {
                     string search = "LDAP://" + asset.ADObject.DistinguishedName;
+                    List<ADListItem> listBuffer = new List<ADListItem>();
+                    int objectBuffer = 0;
+                    int bufferLimit = 25;
 
-#pragma warning disable CA1416 // Validate platform compatibility
-                    // I only intend for this application to be running on Windows, so this is beyond
-                    // my concern. If someone wants a linux desktop build of this they can use wine.'
-
-                    // TODO: Redo data loading in from AD so its presented correctly, 
-
-                    // Fetch all OU's
-                    List<ADOrganizationalUnit> adInfo = new List<ADOrganizationalUnit>();
-                    DirectoryEntry entry = new DirectoryEntry(search);
-                    DirectorySearcher searcher = new DirectorySearcher
+                    foreach (SearchResult result in LoadAssetsFromDN(asset.ADObject.DistinguishedName))
                     {
-                        // specify that you search for organizational units 
-                        SearchRoot = entry,
-                        SearchScope = SearchScope.OneLevel
-                    };
+                        if(stopBrowseThread) { stopBrowseThread = false; break; }
 
-                    foreach (SearchResult result in searcher.FindAll())
-                    {
-                        try
+                        ADObject data = new ADObject();
+                        data.Name = result.Properties["name"].OfType<string>().FirstOrDefault();
+                        data.ObjectClass = result.Properties["objectclass"].OfType<string>().ToArray();
+                        data.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().FirstOrDefault();
+                        data.CheckType();
+
+                        if (String.IsNullOrWhiteSpace(data.Name)) { continue; }
+
+                        this.Dispatcher.Invoke(() =>
                         {
-                            string objectClass = result.Properties["objectclass"].OfType<string>().Last();
-                            string distinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
-                            string name = result.Properties["name"].OfType<string>().First();
+                            ADOrganizationalUnit adinfo = new ADOrganizationalUnit();
+                            adinfo.DistinguishedName = data.DistinguishedName;
+                            adinfo.Name = data.Name;
+                            adinfo.ObjectClass = data.ObjectClass;
 
-                            this.Dispatcher.Invoke(() =>
+                            ADListItem newItem = new ADListItem(data.Name, data.icon);
+                            newItem.ADObject = adinfo;
+                            newItem.MouseDoubleClick += ListItem_DoubleClick;
+                            // Perform buffer check
+                            if (objectBuffer < bufferLimit)
                             {
-                                ADOrganizationalUnit adinfo = new ADOrganizationalUnit();
-                                adinfo.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
-                                adinfo.Name = result.Properties["name"].OfType<string>().First();
-                                adinfo.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
-
-                                ADListItem newItem = new ADListItem(name, "FolderClosed/FolderClosed_16x.xaml");
-                                newItem.ADObject = adinfo;
-                                newItem.MouseDoubleClick += ListItem_DoubleClick;
-                                List_SystemBrowse.Items.Add(newItem);
-
-                                TreeAsset ChildItem = new TreeAsset();
-                                ChildItem.Text = result.Properties["name"].OfType<string>().First();
-                                ChildItem.ADObject = adinfo;
-
-                                ChildItem.Expanded += TreeItem_Expanded;
-                                bool hassSubdirectories = ChildItem.HasSubdirectories();
-                                if (hassSubdirectories)
+                                listBuffer.Add(newItem);
+                                objectBuffer++;
+                            }
+                            else
+                            {
+                                objectBuffer = 0;
+                                foreach (var item in listBuffer)
                                 {
-                                    ChildItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
-                                    newItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
-                                    ChildItem.Items.Add(new TreeAsset());
+                                    List_SystemBrowse.Items.Add(item);
                                 }
-                                else
-                                {
-                                    ChildItem.SetXamlIcon("FolderClosed/FolderClosed_16x.xaml");
-                                }
+                                listBuffer.Clear();
+                            }
 
-                                if (!asset.populated && objectClass == "organizationalUnit")
-                                {
-                                    asset.Items.Add(ChildItem);
-                                }
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            Trace.WriteLine(ex);
-                        }
+                            TreeAsset ChildItem = new TreeAsset();
+                            ChildItem.Text = data.Name;
+                            ChildItem.ADObject = adinfo;
+
+                            ChildItem.Expanded += TreeItem_Expanded;
+                            bool hassSubdirectories = ChildItem.HasSubdirectories();
+                            if (hassSubdirectories)
+                            {
+                                ChildItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
+                                newItem.SetXamlIcon("FolderOpened/FolderOpened_16x.xaml");
+                                ChildItem.Items.Add(new TreeAsset());
+                            }
+                            else
+                            {
+                                ChildItem.SetXamlIcon("FolderClosed/FolderClosed_16x.xaml");
+                            }
+
+                            if (!asset.populated && data.isContainer)
+                            {
+                                asset.Items.Add(ChildItem);
+                            }
+                        });
                     }
-
+                    if (listBuffer.Count > 0)
+                    {
+                        objectBuffer = 0;
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            foreach (var item in listBuffer)
+                            {
+                                List_SystemBrowse.Items.Add(item);
+                            }
+                        });
+                        listBuffer.Clear();
+                    }
                     asset.populated = true;
-                    #pragma warning restore CA1416 // Validate platform compatibility
-                }).Start();
+                });
+                browseThread.Start();
             }
         }
         /// <summary>

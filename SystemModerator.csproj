@@ -36,12 +36,19 @@
   <ItemGroup>
     <Page Remove="Resources\VSIcons\Backwards\Backwards_16x.xaml" />
     <Page Remove="Resources\VSIcons\Backwards\Backwards_disabled_16x.xaml" />
+    <Page Remove="Resources\VSIcons\Computer\Computer_16x.xaml" />
+    <Page Remove="Resources\VSIcons\DocumentsFolder\DocumentsFolder_16x.xaml" />
     <Page Remove="Resources\VSIcons\FolderClosed\FolderClosed_16x.xaml" />
     <Page Remove="Resources\VSIcons\FolderClosed\FolderClosed_grey_16x.xaml" />
     <Page Remove="Resources\VSIcons\FolderOpened\FolderOpened_16x.xaml" />
     <Page Remove="Resources\VSIcons\FolderSearchClosed\FolderSearchClosed_16x.xaml" />
     <Page Remove="Resources\VSIcons\FolderSearchOpened\FolderSearchOpened_16x.xaml" />
     <Page Remove="Resources\VSIcons\LocalServer\LocalServer_16x.xaml" />
+    <Page Remove="Resources\VSIcons\UserGroup\UserGroup_16x.xaml" />
+    <Page Remove="Resources\VSIcons\User\User_16x.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\VSIcons\DocumentsFolder\DocumentsFolder_16x.xaml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Scripts\Main.ps1" />
@@ -52,6 +59,7 @@
     <Resource Include="Resources\TablerIcons\server.png" />
     <Resource Include="Resources\VSIcons\Backwards\Backwards_16x.xaml" />
     <Resource Include="Resources\VSIcons\Backwards\Backwards_disabled_16x.xaml" />
+    <Resource Include="Resources\VSIcons\Computer\Computer_16x.xaml" />
     <Resource Include="Resources\VSIcons\FolderClosed\FolderClosed_16x.xaml" />
     <Resource Include="Resources\VSIcons\FolderClosed\FolderClosed_grey_16x.xaml" />
     <Resource Include="Resources\VSIcons\FolderOpened\FolderOpened_16x.xaml" />
@@ -60,6 +68,8 @@
     </Resource>
     <Resource Include="Resources\VSIcons\FolderSearchOpened\FolderSearchOpened_16x.xaml" />
     <Resource Include="Resources\VSIcons\LocalServer\LocalServer_16x.xaml" />
+    <Resource Include="Resources\VSIcons\UserGroup\UserGroup_16x.xaml" />
+    <Resource Include="Resources\VSIcons\User\User_16x.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

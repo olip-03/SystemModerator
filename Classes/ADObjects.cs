@@ -7,92 +7,99 @@ using System.Windows.Media.Imaging;
 using System.Windows;
 using System.IO;
 using System.Windows.Resources;
+using System.Diagnostics;
+using System.Drawing;
 
 namespace SystemModerator.Classes
 {
     public static class ActiveDirectory
     {
-        public static Dictionary<string, string> GetComputer(string DN)
+        public enum ObjectTypes
         {
-            //Get the Container for the Computer
-            DirectoryEntry deContainer = new DirectoryEntry("LDAP://" + DN);
+            OrganizationalUnit,
+            Computer,
+            User,
+            Group,
+            ForeignSecurityPrincipal,
+            All
+        }
 
-            Dictionary<string, string> pcData = new Dictionary<string, string>();
-            foreach (var item in deContainer.Properties)
+        /// <summary>
+        /// Class containing all methods for managing Organizational Units in Active Directory
+        /// </summary>
+        public class OrganizationalUnits
+        {
+
+        }
+        /// <summary>
+        /// Class containing all methods for managing Computers in Active Directory
+        /// </summary>
+        public class Computers
+        {
+
+        }
+        /// <summary>
+        /// Class containing all methods for managing users in Active Directory
+        /// </summary>
+        public class Users
+        {
+
+        }
+        
+        public static List<ADObject> FetchADObjects(string at, ObjectTypes type)
+        {
+            string search = "LDAP://" + at;
+            string filter = "";
+            switch (type)
             {
-                string test = item.ToString(); 
-                //pcData.Add(item, item);
+                case ObjectTypes.OrganizationalUnit:
+                    filter = "organizationalUnit";
+                    break;
+                case ObjectTypes.Computer:
+                    filter = "computer";
+                    break;
+                case ObjectTypes.User:
+                    filter = "user";
+                    break;
+                case ObjectTypes.Group:
+                    filter = "group";
+                    break;
+                case ObjectTypes.ForeignSecurityPrincipal:
+                    filter = "foreignSecurityPrincipal";
+                    break;
+                default:
+                    filter = "";
+                    break;
             }
-            return pcData;
-        }
-        public static List<ADOrganizationalUnit> GetOUAt()
-        {
-            return GetOUAt("");
-        }
-        public static List<ADOrganizationalUnit> GetOUAt(string searchbase)
-        {
-            string search = "LDAP://" + searchbase;
 
             #pragma warning disable CA1416 // Validate platform compatibility
             // I only intend for this application to be running on Windows, so this is beyond
             // my concern. If someone wants a linux desktop build of this they can use wine.'
 
+            // TODO: Redo data loading in from AD so its presented correctly, 
+
             // Fetch all OU's
-            List<ADOrganizationalUnit> adInfo = new List<ADOrganizationalUnit>();
+            List<ADObject> adInfo = new List<ADObject>();
+
             DirectoryEntry entry = new DirectoryEntry(search);
-            if (String.IsNullOrWhiteSpace(searchbase))
-            {
-                entry = new DirectoryEntry();
-            }
             DirectorySearcher searcher = new DirectorySearcher
             {
                 // specify that you search for organizational units 
                 SearchRoot = entry,
-                Filter = "(objectCategory=organizationalUnit)",
+                Filter = filter,
                 SearchScope = SearchScope.OneLevel
             };
 
             foreach (SearchResult result in searcher.FindAll())
             {
-                ADOrganizationalUnit item = new ADOrganizationalUnit();
-                item.Name = result.Properties["name"].OfType<string>().First();
-                item.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
-                item.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
-                adInfo.Add(item);
-            }
-            #pragma warning restore CA1416 // Validate platform compatibility
-            return adInfo;
-        }
-        public static List<ADComputer> GetPCAt(string searchbase)
-        {
-            string search = "LDAP://" + searchbase;
+                string name = result.Properties["name"].OfType<string>().First();
+                string distinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
 
-            #pragma warning disable CA1416 // Validate platform compatibility
-            // I only intend for this application to be running on Windows, so this is beyond
-            // my concern. If someone wants a linux desktop build of this they can use wine.'
+                string[] objectClass = (string[])result.Properties["objectClass"].OfType<string>();
 
-            // Fetch all OU's
-            List<ADComputer> adInfo = new List<ADComputer>();
-            DirectoryEntry entry = new DirectoryEntry(search);
-            if (String.IsNullOrWhiteSpace(searchbase))
-            {
-                entry = new DirectoryEntry();
-            }
-            DirectorySearcher searcher = new DirectorySearcher
-            {
-                // specify that you search for organizational units 
-                SearchRoot = entry,
-                Filter = "(objectCategory=computer)",
-                SearchScope = SearchScope.OneLevel
-            };
+                ADObject newObject = new(name, objectClass, distinguishedName);
 
-            foreach (SearchResult result in searcher.FindAll())
-            {
-                ADComputer item = new ADComputer();
-                item.Name = result.Properties["name"].OfType<string>().First();
-                item.ObjectClass = result.Properties["objectclass"].OfType<string>().First();
-                item.DistinguishedName = result.Properties["distinguishedname"].OfType<string>().First();
-                adInfo.Add(item);
+                adInfo.Add(newObject);
             }
             #pragma warning restore CA1416 // Validate platform compatibility
             return adInfo;
@@ -188,17 +195,94 @@ namespace SystemModerator.Classes
     }
     public class ADObject
     {
-        public string Name { get; set; }
-        public string ObjectClass { get; set; }
-        public string DistinguishedName { get; set; }
+        public string Name;
+        public string[] ObjectClass;
+        public string DistinguishedName;
+        public string icon = null;
+        public ADObject()
+        {
+
+        }
+        public ADObject(string _name, string[] _ObjectClass, string _DistinguishedName)
+        {
+            Name = _name;
+            ObjectClass = _ObjectClass;
+            DistinguishedName = _DistinguishedName;
+            CheckType();
+        }
+        public bool isContainer
+        {
+            get { return IsContainer(); }
+            private set { }
+        }
+        public bool isGroup
+        {
+            get { return IsGroup(); }
+            private set { }
+        }
+        public bool isUser
+        {
+            get { return IsUser(); }
+            private set { }
+        }
+        public bool isComputer
+        {
+            get { return IsComputer(); }
+            private set { }
+        }
+
+        public void CheckType()
+        {
+            IsContainer();
+            IsGroup();
+            IsUser();
+            IsComputer();
+        }
+        private bool IsContainer()
+        {
+            string ContainerIcon = "FolderClosed/FolderClosed_16x.xaml";
+
+            if (ObjectClass.Contains("organizationalUnit")) { icon = ContainerIcon; return true; }
+            if(ObjectClass.Contains("container")) { icon = ContainerIcon; return true; }
+            if(ObjectClass.Contains("builtinDomain")) { icon = ContainerIcon; return true; }
+
+            return false;
+        }
+        private bool IsGroup()
+        {
+            string GroupIcon = "UserGroup/UserGroup_16x.xaml";
+
+            if (ObjectClass.Contains("group")) { icon = GroupIcon; return true; }
+            return false;
+        }
+        private bool IsUser()
+        {
+            string UserIcon = "User/User_16x.xaml";
+
+            if (ObjectClass.Contains("user")) { icon = UserIcon; return true; }
+
+            if (ObjectClass.Contains("computer")) { return false; }
+            return false;
+        }
+        private bool IsComputer()
+        {
+            string ComputerIcon = "Computer/Computer_16x.xaml";
+
+            if (ObjectClass.Contains("computer")) { icon = ComputerIcon;  return true; }
+
+            return false;
+        }
     }
-    public class ADOrganizationalUnit: ADObject
+    public class ADOrganizationalUnit : ADObject
     {
-        public string ObjectClass = "organizationalUnit";
+        public new string[] ObjectClass = { "organizationalUnit" };
     }
     public class ADComputer: ADObject
     {
-        public string ObjectClass = "computer";
-
+        public new string[] ObjectClass = { "computer" };
+    }
+    public class ADUser: ADObject
+    {
+        public new string[] ObjectClass = { "user" };
     }
 }
